@@ -1,163 +1,125 @@
 # 🏎️ F1 AI Strategy Engine (V4)
 
-An end-to-end **AI-powered Formula 1 race strategy system** that predicts pit stop probability and simulates optimal race decisions using machine learning, physics-based modeling, and real telemetry-inspired features.
+An AI-powered Formula 1 race strategy system that predicts pit stop probability and simulates optimal race decisions using machine learning, telemetry-inspired features, and physics-based race modeling.
+
+---
+
+## 🚀 Live Demo
+
+👉 **Streamlit App (Deployed):**  
+https://f1-ai-strategy-engine-cj4xvwjwnqk4prdg5hy6hf.streamlit.app/
 
 ---
 
 ## 🔥 Overview
 
-The F1 AI Strategy Engine simulates real-world race strategy decisions used in Formula 1 teams.
+This project simulates real-world Formula 1 race strategy decisions by combining:
 
-It combines:
 - Machine Learning (XGBoost)
 - Race simulation physics
-- Feature engineering from telemetry-style data
-- Interactive Streamlit dashboard
+- Tire degradation modeling
+- Driver and track-based performance behavior
+- Feature engineering from lap-level race data
 
-The system answers:
+It helps answer:
 
-> ❓ Should the driver pit now or stay out?
+> 🧠 “Should the driver pit now or stay out?”
 
 ---
 
-## 🎯 Key Features
+## 🧠 Key Features
 
-### 🧠 Machine Learning Layer
+### 🏁 AI Strategy Engine
 - Pit stop probability prediction
-- XGBoost classification model
-- SMOTE handling for class imbalance
-- Feature-rich race state representation
+- PIT vs STAY decision system
+- Confidence scoring
 
-### 🏁 Strategy Simulation Engine
-- Pit vs Stay time simulation
-- Tyre degradation modeling
-- Track + driver-specific logic
-- Race progression awareness
-
-### 📊 Feature Engineering
-- Lap-wise performance trends
-- Tire life modeling
-- Degradation rate estimation
-- Stint length tracking
-- Pit stop history encoding
+### 📊 Simulation System
+- Tire degradation modeling
+- Lap time progression simulation
+- Pit loss vs time gain comparison
 
 ### 📈 Visualization Dashboard
-Built using **Streamlit + Plotly**
-
-- Interactive sliders (lap, tyre, driver, track)
-- Real-time strategy decision output
-- Bar chart: Pit vs Stay comparison
-- Pie chart: strategy advantage breakdown
-- Confidence-based decision UI
+- Interactive Streamlit UI
+- Strategy comparison charts
+- Pit vs Stay performance graphs
+- Decision analytics
 
 ---
 
-## 🧱 Project Architecture
+## 🧱 Tech Stack
 
-User Input (Streamlit UI)
-↓
-Feature Engineering Layer
-↓
-ML Model (Pit Probability)
-↓
-Strategy Simulation Engine
-↓
-Decision Logic (Pit / Stay)
-↓
-Visualization Dashboard
-
+- Python
+- Pandas, NumPy
+- XGBoost
+- Scikit-learn
+- FastF1 (race data source)
+- Streamlit (dashboard)
+- Plotly (visualization)
 
 ---
 
 ## 🗂️ Project Structure
 
 
-f1-ai-strategy-engine/
-│
-├── app.py # Streamlit dashboard entry point
-├── main.py # Data pipeline runner
-├── requirements.txt
-│
-├── src/
-│ ├── predict.py # ML inference pipeline
-│ ├── preprocessing.py # Data cleaning + transformations
-│ ├── feature_engineering.py # Feature creation logic
-│ ├── data_loader.py # FastF1 race data ingestion
-│ │
-│ └── strategy/
-│ ├── decision_engine.py # Final race decision logic
-│ ├── simulator.py # Pit vs stay simulation
-│ ├── tyre_model.py # Tire degradation model
-│ ├── driver_model.py # Driver performance modeling
-│ └── track_model.py # Circuit-specific behavior
-│
-├── models/
-│ ├── pit_strategy_model.pkl
-│ └── degradation_model.pkl
-│
-├── data/
-│ ├── processed/
-│ └── strategy_params.py
-│
-└── notebooks/
+src/
+├── predict.py
+├── preprocessing.py
+├── feature_engineering.py
+├── data_loader.py
+├── strategy/
+│ ├── decision_engine.py
+│ ├── simulator.py
+│ ├── driver_model.py
+│ ├── tyre_model.py
+│ └── track_model.py
 
 
 ---
 
-## ⚙️ Tech Stack
+## 📌 Version Roadmap
 
-- **Python 3.10+**
-- Pandas, NumPy
-- Scikit-learn
-- XGBoost
-- imbalanced-learn (SMOTE)
-- FastF1 (telemetry data)
-- Streamlit (UI)
-- Plotly (visualization)
+### 🔵 V4 — Current Version (Data-Driven Strategy Engine)
+- ML-based pit stop prediction
+- Physics-based race simulation
+- Driver + tyre + track modeling
+- Interactive Streamlit dashboard
 
 ---
 
-## 🚀 How to Run Locally
+### 🟡 V5 — Upcoming Improvements
+Planned upgrades include:
 
-### 1. Clone repository
-```bash
-git clone https://github.com/<your-username>/f1-ai-strategy-engine.git
-cd f1-ai-strategy-engine
-2. Install dependencies
-pip install -r requirements.txt
-3. Run dashboard
-streamlit run app.py
-📊 Example Output
-Strategy Decision
-🟢 Decision: PIT NOW
-📊 Confidence: HIGH
-⏱ Pit Advantage: +1.41 sec
-Visualization
-Pit vs Stay time comparison chart
-Strategy advantage pie breakdown
-🧠 Core Idea
+- 🧠 Real-time telemetry simulation
+- 🌦️ Weather impact modeling (rain / temperature effects)
+- 🔄 Multi-stop strategy optimization (2-stop / 3-stop logic)
+- 🤖 Reinforcement learning-based strategy agent
+- 📡 Live race simulation mode
+- ⚡ Performance optimization for real-time response
 
-Instead of static race rules, this system learns from:
+---
 
-historical lap data
-tire degradation patterns
-driver performance trends
-race progression dynamics
+## 🎯 Project Goal
 
-and generates adaptive race strategy decisions.
+To build a **realistic AI race engineer system** capable of simulating and improving Formula 1 strategy decisions using data-driven intelligence.
 
-📌 Future Improvements
-🔴 Real-time telemetry streaming
-🌦️ Weather impact modeling
-🟣 Multi-stop optimization engine
-🧮 Reinforcement learning strategy agent
-📡 Live race simulation mode
-🏁 Project Impact
+---
 
-This project demonstrates:
+## 👨‍💻 Author
 
-End-to-end ML pipeline design
-Real-world sports analytics application
-Simulation + prediction hybrid system
-Production-style project architecture
-Interactive data product development
+Built as a Data Science + AI engineering project focused on:
+
+- Sports analytics
+- Machine learning systems
+- Simulation-based decision making
+- Real-world race strategy modeling
+
+---
+
+## ⭐ Future Vision
+
+This project will evolve into a full **AI Race Strategy Simulator**, capable of:
+
+- Acting like a virtual F1 race engineer
+- Supporting multiple drivers simultaneously
+- Running full race simulations in real time
