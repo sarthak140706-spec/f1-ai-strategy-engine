@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+D:\FastF1Cache/
+
+data/raw/
+
+*.pyc
+*.pyo
+
+models/*.pkl
+
+.vscode/
