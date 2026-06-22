@@ -1,7 +1,9 @@
-fastf1
+streamlit
 pandas
+numpy
 scikit-learn
 xgboost
-streamlit
 plotly
 joblib
+imblearn
+fastf1

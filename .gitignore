@@ -1,14 +1,19 @@
-.venv/
+# Python cache
 __pycache__/
-.ipynb_checkpoints/
-
-D:\FastF1Cache/
-
-data/raw/
-
 *.pyc
-*.pyo
 
-models/*.pkl
+# Virtual env
+.venv/
 
-.vscode/
+# Models (optional if large)
+*.pkl
+
+# Data files
+data/raw/
+data/processed/
+
+# Streamlit cache
+.streamlit/
+
+# OS files
+.DS_Store
