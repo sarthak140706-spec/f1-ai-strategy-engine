@@ -28,6 +28,7 @@ def build_dataset(season=2025):
 
             df = clean_data(df)
             df = convert_time_features(df)
+
             df = detect_pit_stops(df)
             df = create_race_features(df)
             df = create_target(df)
@@ -44,6 +45,32 @@ def build_dataset(season=2025):
         all_races,
         ignore_index=True
     )
+
+    required_columns = [
+        "Driver",
+        "Team",
+        "LapNumber",
+        "Position",
+        "Compound",
+        "TyreLife",
+        "Stint",
+        "TrackStatus",
+        "LapTimeSeconds",
+        "PitLap",
+        "PitNextLap",
+        "LapsRemaining",
+        "RaceProgress",
+        "AvgPaceLast3",
+        "AvgPaceLast5",
+        "AvgPaceLast10",
+        "DegradationRate",
+        "CurrentStintLength",
+        "PitStopsCompleted",
+        "Season",
+        "Race"
+    ]
+
+    dataset = dataset[required_columns]
 
     dataset.to_csv(
         "data/processed/f1_2025_dataset.csv",

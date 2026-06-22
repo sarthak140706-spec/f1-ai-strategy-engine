@@ -3,7 +3,6 @@ import joblib
 from xgboost import XGBRegressor
 
 from sklearn.metrics import mean_absolute_error
-
 from sklearn.model_selection import train_test_split
 
 
@@ -12,11 +11,9 @@ def train_degradation_model(df):
     df = df.copy()
 
     df["FutureLapTime"] = (
-        df.groupby("Driver")["LapTimeSeconds"]
+        df.groupby(["Race", "Driver"])["LapTimeSeconds"]
         .shift(-1)
     )
-
-    df = df.dropna()
 
     features = [
         "TyreLife",
@@ -24,6 +21,12 @@ def train_degradation_model(df):
         "AvgPaceLast5",
         "DegradationRate"
     ]
+
+    df = df.dropna(
+        subset=features + ["FutureLapTime"]
+    )
+
+    print("Training samples:", len(df))
 
     X = df[features]
 
@@ -39,7 +42,8 @@ def train_degradation_model(df):
     model = XGBRegressor(
         n_estimators=200,
         max_depth=5,
-        learning_rate=0.05
+        learning_rate=0.05,
+        random_state=42
     )
 
     model.fit(X_train, y_train)

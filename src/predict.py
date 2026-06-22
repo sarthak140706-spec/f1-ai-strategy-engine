@@ -1,9 +1,20 @@
 import joblib
 
 
-pit_model = joblib.load(
-    "models/pit_strategy_model.pkl"
+import os
+import joblib
+
+PROJECT_ROOT = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..")
 )
+
+MODEL_PATH = os.path.join(
+    PROJECT_ROOT,
+    "models",
+    "pit_strategy_model.pkl"
+)
+
+pit_model = joblib.load(MODEL_PATH)
 
 
 FEATURES = [

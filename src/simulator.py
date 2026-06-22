@@ -1,57 +1,32 @@
-import joblib
-import pandas as pd
-
-
-pit_model = joblib.load("models/pit_strategy_model.pkl")
-degradation_model = joblib.load("models/degradation_model.pkl")
-
-
 def simulate_strategy(
-    current_state,
-    pit_loss=22,
-    fresh_tyre_gain=1.2,
-    degradation_per_lap=0.05
+    current_lap,
+    tyre_life,
+    predicted_lap_time,
+    laps_remaining,
+    pit_loss=22
 ):
-    """
-    Compare two scenarios:
-    1. Stay out
-    2. Pit now
-    """
 
-    laps_remaining = int(current_state["LapsRemaining"])
-    predicted_lap_time = current_state["AvgPaceLast5"]
+    stay_out_time = 0
 
-    # Scenario 1: Stay out
+    lap_time = predicted_lap_time
 
-    stay_out_total = 0
-    current_lap_time = predicted_lap_time
+    for _ in range(int(laps_remaining)):
 
-    for _ in range(laps_remaining):
-        stay_out_total += current_lap_time
-        current_lap_time += degradation_per_lap
+        stay_out_time += lap_time
 
-    # Scenario 2: Pit now
+        lap_time += 0.08
 
-    pit_now_total = pit_loss
+    pit_now_time = pit_loss
 
-    fresh_lap_time = predicted_lap_time - fresh_tyre_gain
+    fresh_tyre_lap = predicted_lap_time - 1.2
 
-    for _ in range(laps_remaining):
-        pit_now_total += fresh_lap_time
-        fresh_lap_time += degradation_per_lap / 2
+    for _ in range(int(laps_remaining)):
 
-    recommendation = (
-        "Pit Now"
-        if pit_now_total < stay_out_total
-        else "Stay Out"
-    )
+        pit_now_time += fresh_tyre_lap
+
+        fresh_tyre_lap += 0.04
 
     return {
-        "stay_out_time": round(stay_out_total, 2),
-        "pit_now_time": round(pit_now_total, 2),
-        "time_gain": round(
-            abs(stay_out_total - pit_now_total),
-            2
-        ),
-        "recommendation": recommendation
+        "stay_out": round(stay_out_time, 2),
+        "pit_now": round(pit_now_time, 2)
     }
