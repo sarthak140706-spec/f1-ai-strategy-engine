@@ -1,48 +1,141 @@
-from src.build_dataset import build_dataset
-from src.feature_engineering import prepare_model_data
-from src.train_model import train_model
+from src.build_dataset import (
+    build_dataset
+)
+
+from src.feature_engineering import (
+    prepare_model_data
+)
+
+from src.train_model import (
+    train_model
+)
+
+from src.degradation_model import (
+    train_degradation_model
+)
 
 
 def main():
 
-    print("\n======================================")
-    print("🚀 F1 AI STRATEGIST - V4 PIPELINE")
-    print("======================================\n")
+    print(
+        "\n======================================"
+    )
 
-    # -----------------------------
-    # STEP 1: BUILD DATASET
-    # -----------------------------
-    print("📊 Building dataset from FastF1...")
+    print(
+        "🚀 F1 AI STRATEGY ENGINE"
+    )
 
-    dataset = build_dataset(season=2025)
+    print(
+        "   V5 FOUNDATION PIPELINE"
+    )
 
-    print("✅ Dataset created!")
-    print("Shape:", dataset.shape)
+    print(
+        "======================================\n"
+    )
 
-    # -----------------------------
-    # STEP 2: PREPARE MODEL DATA
-    # -----------------------------
-    print("\n🧠 Preparing model data...")
+    # ------------------------------------------
+    # STEP 1
+    # BUILD DATASET
+    # ------------------------------------------
 
-    model_data = prepare_model_data(dataset)
+    print(
+        "📊 Building dataset..."
+    )
 
-    print("✅ Model data ready!")
-    print("Shape:", model_data.shape)
+    dataset = build_dataset(
 
-    # -----------------------------
-    # STEP 3: TRAIN MODEL
-    # -----------------------------
-    print("\n🏁 Training XGBoost model...")
+        seasons=[
 
-    model = train_model(model_data)
+            2022,
 
-    print("\n✅ MODEL TRAINING COMPLETED!")
-    print("📦 Model saved to: models/pit_strategy_model.pkl")
+            2023,
 
-    print("\n======================================")
-    print("🏎️ V4 PIPELINE FINISHED SUCCESSFULLY")
-    print("======================================\n")
+            2024,
+
+            2025
+
+        ]
+
+    )
+
+    print(
+        "\n✅ Dataset created!"
+    )
+
+    print(
+        "Shape:",
+        dataset.shape
+    )
+
+    # ------------------------------------------
+    # STEP 2
+    # PREPARE MODEL DATA
+    # ------------------------------------------
+
+    print(
+        "\n🧠 Preparing model data..."
+    )
+
+    model_data = (
+
+        prepare_model_data(
+            dataset
+        )
+
+    )
+
+    print(
+        "✅ Model data ready!"
+    )
+
+    print(
+        "Shape:",
+        model_data.shape
+    )
+
+    # ------------------------------------------
+    # STEP 3
+    # TRAIN PIT MODEL
+    # ------------------------------------------
+
+    print(
+        "\n🏁 Training pit strategy model..."
+    )
+
+    train_model(
+        model_data
+    )
+
+    # ------------------------------------------
+    # STEP 4
+    # TRAIN DEGRADATION MODEL
+    # ------------------------------------------
+
+    print(
+        "\n🛞 Training degradation model..."
+    )
+
+    train_degradation_model(
+        dataset
+    )
+
+    # ------------------------------------------
+    # COMPLETE
+    # ------------------------------------------
+
+    print(
+        "\n======================================"
+    )
+
+    print(
+        "✅ V5 FOUNDATION TRAINING COMPLETE"
+    )
+
+    print(
+        "======================================\n"
+    )
 
 
 if __name__ == "__main__":
+
     main()

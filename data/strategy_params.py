@@ -1,28 +1,48 @@
 # data/strategy_params.py
 
-TRACK_PIT_LOSS = {
-    "Monaco": 24.0,
-    "Monza": 19.0,
-    "Silverstone": 21.0,
-    "Bahrain": 20.5
+"""
+Fallback strategy parameters.
+
+These values are used only when dynamic race data is unavailable.
+V5 will gradually replace these static defaults with
+data-driven estimates derived from FastF1 and race simulations.
+"""
+
+# --------------------------------------------------
+# DEFAULT PIT LOSS
+# --------------------------------------------------
+
+DEFAULT_PIT_LOSS = 22.0
+
+
+# --------------------------------------------------
+# DEFAULT TYRE DEGRADATION
+# --------------------------------------------------
+
+DEFAULT_TYRE_DEGRADATION = {
+    "SOFT": 0.10,
+    "MEDIUM": 0.06,
+    "HARD": 0.03,
+    "INTERMEDIATE": 0.08,
+    "WET": 0.12
 }
 
-TYRE_DEGRADATION = {
-    "Soft": 0.10,
-    "Medium": 0.06,
-    "Hard": 0.03
+
+# --------------------------------------------------
+# DEFAULT FRESH TYRE ADVANTAGE
+# --------------------------------------------------
+
+DEFAULT_FRESH_TYRE_BONUS = {
+    "SOFT": 1.2,
+    "MEDIUM": 0.9,
+    "HARD": 0.6,
+    "INTERMEDIATE": 1.0,
+    "WET": 1.0
 }
 
-FRESH_TYRE_BONUS = {
-    "Soft": 1.2,
-    "Medium": 0.9,
-    "Hard": 0.6
-}
 
-DRIVER_STYLE = {
-    "Verstappen": 1.12,
-    "Hamilton": 1.05,
-    "Leclerc": 1.08,
-    "Alonso": 0.95,
-    "Default": 1.0
-}
+# --------------------------------------------------
+# DEFAULT DRIVER PERFORMANCE FACTOR
+# --------------------------------------------------
+
+DEFAULT_DRIVER_FACTOR = 1.0

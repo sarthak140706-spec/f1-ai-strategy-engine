@@ -2,10 +2,11 @@ import pandas as pd
 import fastf1
 
 from src.data_loader import load_race_data
+
 from src.preprocessing import (
-    clean_data,
-    convert_time_features
+    preprocess_data
 )
+
 from src.feature_engineering import (
     detect_pit_stops,
     create_race_features,
@@ -13,41 +14,113 @@ from src.feature_engineering import (
 )
 
 
-def build_dataset(season=2025):
+def build_dataset(
+    seasons=None
+):
 
-    schedule = fastf1.get_event_schedule(season)
+    """
+    Build a training dataset from
+    multiple F1 seasons.
+
+    Example:
+
+    build_dataset(
+        seasons=[2022, 2023, 2024, 2025]
+    )
+    """
+
+    if seasons is None:
+
+        seasons = [
+            2022,
+            2023,
+            2024,
+            2025
+        ]
 
     all_races = []
 
-    for race in schedule["EventName"]:
+    for season in seasons:
 
-        try:
-            print(f"Processing {race}")
+        print(
+            f"\n🏎️ Processing season: {season}"
+        )
 
-            df = load_race_data(season, race)
+        schedule = (
+            fastf1
+            .get_event_schedule(
+                season
+            )
+        )
 
-            df = clean_data(df)
-            df = convert_time_features(df)
-            df = detect_pit_stops(df)
-            df = create_race_features(df)
-            df = create_target(df)
+        for race in schedule[
+            "EventName"
+        ]:
 
-            df["Season"] = season
-            df["Race"] = race
+            try:
 
-            all_races.append(df)
+                print(
+                    f"Processing {season} - {race}"
+                )
 
-        except Exception as e:
-            print(f"Skipped {race}: {e}")
+                df = load_race_data(
+                    season,
+                    race
+                )
+
+                df = preprocess_data(
+                    df
+                )
+
+                df = detect_pit_stops(
+                    df
+                )
+
+                df = create_race_features(
+                    df
+                )
+
+                df = create_target(
+                    df
+                )
+
+                df["Season"] = (
+                    season
+                )
+
+                df["Race"] = (
+                    race
+                )
+
+                all_races.append(
+                    df
+                )
+
+            except Exception as e:
+
+                print(
+                    f"Skipped {season} - "
+                    f"{race}: {e}"
+                )
+
+    if not all_races:
+
+        raise ValueError(
+            "No race data was successfully loaded."
+        )
 
     dataset = pd.concat(
         all_races,
         ignore_index=True
     )
 
-    dataset.to_csv(
-        "data/processed/f1_2025_dataset.csv",
-        index=False
+    print(
+        "\n✅ Dataset built successfully."
+    )
+
+    print(
+        "Shape:",
+        dataset.shape
     )
 
     return dataset
