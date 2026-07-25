@@ -2,6 +2,11 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+
+# ============================================================
+# V5 IMPORTS
+# ============================================================
+
 from src.data_loader import (
     get_race_schedule,
     get_available_drivers,
@@ -17,18 +22,14 @@ from src.feature_engineering import (
     create_race_features
 )
 
-from src.predict import (
-    predict_pit_probability
-)
-
-from src.simulator import (
-    simulate_strategy
+from src.strategy.decision_engine import (
+    get_strategy_decision
 )
 
 
-# ==================================================
+# ============================================================
 # PAGE CONFIG
-# ==================================================
+# ============================================================
 
 st.set_page_config(
 
@@ -44,27 +45,31 @@ st.set_page_config(
 )
 
 
+# ============================================================
+# TITLE
+# ============================================================
+
 st.title(
     "🏎️ F1 AI Strategy Engineer"
 )
 
 st.caption(
-    "V5 Foundation — Dynamic F1 Race Data"
+    "V5 — Dynamic FastF1 Race Strategy Engine"
 )
 
 
-# ==================================================
+# ============================================================
 # SIDEBAR
-# ==================================================
+# ============================================================
 
 st.sidebar.header(
     "🏁 Race Selection"
 )
 
 
-# --------------------------------------------------
+# ============================================================
 # SEASON
-# --------------------------------------------------
+# ============================================================
 
 season = st.sidebar.number_input(
 
@@ -81,9 +86,9 @@ season = st.sidebar.number_input(
 )
 
 
-# --------------------------------------------------
-# GET SCHEDULE
-# --------------------------------------------------
+# ============================================================
+# LOAD RACE SCHEDULE
+# ============================================================
 
 try:
 
@@ -106,15 +111,30 @@ try:
 except Exception as e:
 
     st.error(
-        f"Unable to load schedule: {e}"
+
+        "Unable to load F1 race schedule: "
+
+        f"{e}"
+
     )
 
     st.stop()
 
 
-# --------------------------------------------------
+if not races:
+
+    st.warning(
+
+        "No races found for the selected season."
+
+    )
+
+    st.stop()
+
+
+# ============================================================
 # GRAND PRIX
-# --------------------------------------------------
+# ============================================================
 
 grand_prix = st.sidebar.selectbox(
 
@@ -125,29 +145,58 @@ grand_prix = st.sidebar.selectbox(
 )
 
 
-# --------------------------------------------------
+# ============================================================
 # SESSION
-# --------------------------------------------------
+# ============================================================
 
 session_type = st.sidebar.selectbox(
 
     "Session",
 
     [
+
         "R",
+
         "Q",
+
         "FP1",
+
         "FP2",
+
         "FP3",
+
         "S"
-    ]
+
+    ],
+
+    format_func=lambda x: {
+
+        "R": "Race",
+
+        "Q": "Qualifying",
+
+        "FP1": "Free Practice 1",
+
+        "FP2": "Free Practice 2",
+
+        "FP3": "Free Practice 3",
+
+        "S": "Sprint"
+
+    }.get(
+
+        x,
+
+        x
+
+    )
 
 )
 
 
-# ==================================================
+# ============================================================
 # LOAD DRIVERS
-# ==================================================
+# ============================================================
 
 try:
 
@@ -164,11 +213,15 @@ try:
 except Exception as e:
 
     st.warning(
+
         "Unable to load drivers for this session."
+
     )
 
     st.caption(
+
         str(e)
+
     )
 
     st.stop()
@@ -177,15 +230,17 @@ except Exception as e:
 if not drivers:
 
     st.warning(
+
         "No drivers found for this session."
+
     )
 
     st.stop()
 
 
-# --------------------------------------------------
+# ============================================================
 # DRIVER SELECTOR
-# --------------------------------------------------
+# ============================================================
 
 driver = st.sidebar.selectbox(
 
@@ -196,16 +251,33 @@ driver = st.sidebar.selectbox(
 )
 
 
-# ==================================================
-# LOAD DRIVER DATA
-# ==================================================
+# ============================================================
+# ANALYZE BUTTON
+# ============================================================
 
-if st.sidebar.button(
-    "🏁 Analyze Strategy"
-):
+analyze = st.sidebar.button(
+
+    "🏁 Analyze Strategy",
+
+    type="primary"
+
+)
+
+
+# ============================================================
+# MAIN ANALYSIS
+# ============================================================
+
+if analyze:
+
+    # ========================================================
+    # LOAD DRIVER DATA
+    # ========================================================
 
     with st.spinner(
-        "Loading F1 session data..."
+
+        "Loading FastF1 race data..."
+
     ):
 
         try:
@@ -225,50 +297,80 @@ if st.sidebar.button(
         except Exception as e:
 
             st.error(
-                f"Unable to load driver data: {e}"
+
+                "Unable to load driver data: "
+
+                f"{e}"
+
             )
 
             st.stop()
 
 
-    # --------------------------------------------------
+    # ========================================================
     # PREPROCESS
-    # --------------------------------------------------
+    # ========================================================
 
-    driver_laps = preprocess_data(
-        driver_laps
-    )
+    try:
 
+        driver_laps = preprocess_data(
 
-    driver_laps = detect_pit_stops(
-        driver_laps
-    )
+            driver_laps
 
+        )
 
-    driver_laps = create_race_features(
-        driver_laps
-    )
+        driver_laps = detect_pit_stops(
 
+            driver_laps
 
-    if driver_laps.empty:
+        )
+
+        driver_laps = create_race_features(
+
+            driver_laps
+
+        )
+
+    except Exception as e:
 
         st.error(
-            "No valid lap data available."
+
+            "Race data processing failed: "
+
+            f"{e}"
+
         )
 
         st.stop()
 
 
-    # ==================================================
+    # ========================================================
+    # VALIDATE DATA
+    # ========================================================
+
+    if driver_laps.empty:
+
+        st.error(
+
+            "No valid lap data available."
+
+        )
+
+        st.stop()
+
+
+    # ========================================================
     # CURRENT RACE STATE
-    # ==================================================
+    # ========================================================
 
     latest = (
 
         driver_laps
 
         .sort_values(
+
             "LapNumber"
+
         )
 
         .iloc[-1]
@@ -276,9 +378,9 @@ if st.sidebar.button(
     )
 
 
-    # --------------------------------------------------
-    # BUILD MODEL INPUT
-    # --------------------------------------------------
+    # ========================================================
+    # MODEL FEATURES
+    # ========================================================
 
     model_features = [
 
@@ -307,6 +409,10 @@ if st.sidebar.button(
     ]
 
 
+    # ========================================================
+    # CHECK FEATURES
+    # ========================================================
+
     missing_features = [
 
         feature
@@ -323,16 +429,22 @@ if st.sidebar.button(
 
         st.error(
 
-            "Missing required features: "
+            "Missing required ML features: "
 
             + ", ".join(
+
                 missing_features
+
             )
 
         )
 
         st.stop()
 
+
+    # ========================================================
+    # BUILD MODEL INPUT
+    # ========================================================
 
     model_input = pd.DataFrame(
 
@@ -353,36 +465,139 @@ if st.sidebar.button(
     )
 
 
-    # ==================================================
-    # ML PREDICTION
-    # ==================================================
+    # ========================================================
+    # EXTRACT STRATEGY INPUTS
+    # ========================================================
 
-    try:
+    # --------------------------------------------------------
+    # TRACK
+    # --------------------------------------------------------
 
-        pit_probability = (
+    track = (
 
-            predict_pit_probability(
+        latest.get(
 
-                model_input
+            "Circuit",
+
+            grand_prix
+
+        )
+
+    )
+
+
+    # --------------------------------------------------------
+    # TYRE COMPOUND
+    # --------------------------------------------------------
+
+    tyre_compound = (
+
+        latest.get(
+
+            "TyreCompound",
+
+            latest.get(
+
+                "Compound",
+
+                "MEDIUM"
 
             )
 
         )
 
-    except Exception as e:
-
-        st.error(
-
-            f"Prediction failed: {e}"
-
-        )
-
-        st.stop()
+    )
 
 
-    # ==================================================
+    # --------------------------------------------------------
+    # PREDICTED LAP TIME
+    # --------------------------------------------------------
+
+    predicted_lap_time = (
+
+        latest[
+            "AvgPaceLast5"
+        ]
+
+    )
+
+
+    # --------------------------------------------------------
+    # LAPS REMAINING
+    # --------------------------------------------------------
+
+    laps_remaining = int(
+
+        latest[
+            "LapsRemaining"
+        ]
+
+    )
+
+
+    # ========================================================
+    # RUN V5 DECISION ENGINE
+    # ========================================================
+
+    with st.spinner(
+
+        "AI Strategy Engine is analyzing the race..."
+
+    ):
+
+        try:
+
+            strategy_result = (
+
+                get_strategy_decision(
+
+                    track=track,
+
+                    driver=driver,
+
+                    tyre_compound=tyre_compound,
+
+                    predicted_lap_time=(
+
+                        predicted_lap_time
+
+                    ),
+
+                    laps_remaining=(
+
+                        laps_remaining
+
+                    ),
+
+                    model_data=model_input
+
+                )
+
+            )
+
+        except Exception as e:
+
+            st.error(
+
+                "Strategy analysis failed: "
+
+                f"{e}"
+
+            )
+
+            st.stop()
+
+
+    # ========================================================
     # TOP METRICS
-    # ==================================================
+    # ========================================================
+
+    st.subheader(
+
+        "🏎️ Current Race Overview"
+
+    )
+
 
     col1, col2, col3, col4 = (
 
@@ -396,9 +611,11 @@ if st.sidebar.button(
         "Current Lap",
 
         int(
+
             latest[
                 "LapNumber"
             ]
+
         )
 
     )
@@ -409,9 +626,11 @@ if st.sidebar.button(
         "Position",
 
         int(
+
             latest[
                 "Position"
             ]
+
         )
 
     )
@@ -422,9 +641,11 @@ if st.sidebar.button(
         "Tyre Life",
 
         int(
+
             latest[
                 "TyreLife"
             ]
+
         )
 
     )
@@ -434,7 +655,7 @@ if st.sidebar.button(
 
         "Pit Probability",
 
-        f"{pit_probability}%"
+        f"{strategy_result['pit_probability']}%"
 
     )
 
@@ -442,49 +663,161 @@ if st.sidebar.button(
     st.divider()
 
 
-    # ==================================================
-    # RACE ENGINEER PANEL
-    # ==================================================
+    # ========================================================
+    # FINAL AI DECISION
+    # ========================================================
 
     st.subheader(
 
-        "🧠 Race Engineer Analysis"
+        "🧠 AI Strategy Decision"
 
     )
 
 
-    if pit_probability >= 50:
+    final_decision = (
 
-        decision = "PIT"
+        strategy_result[
+            "final_decision"
+        ]
+
+    )
+
+
+    confidence = (
+
+        strategy_result[
+            "confidence"
+        ]
+
+    )
+
+
+    if final_decision == "PIT NOW":
 
         st.error(
 
-            f"🔴 RECOMMENDATION: {decision}"
+            f"🔴 FINAL RECOMMENDATION: "
+
+            f"{final_decision}"
 
         )
 
     else:
 
-        decision = "STAY"
-
         st.success(
 
-            f"🟢 RECOMMENDATION: {decision}"
+            f"🟢 FINAL RECOMMENDATION: "
+
+            f"{final_decision}"
 
         )
 
 
-    st.info(
+    # ========================================================
+    # DECISION METRICS
+    # ========================================================
 
-        f"Pit Probability: "
-        f"{pit_probability}%"
+    decision_col1, decision_col2, decision_col3 = (
+
+        st.columns(3)
 
     )
 
 
-    # ==================================================
-    # CURRENT RACE DATA
-    # ==================================================
+    decision_col1.metric(
+
+        "Pit Probability",
+
+        f"{strategy_result['pit_probability']}%"
+
+    )
+
+
+    decision_col2.metric(
+
+        "Simulator",
+
+        strategy_result[
+
+            "simulator_recommendation"
+
+        ]
+
+    )
+
+
+    decision_col3.metric(
+
+        "Confidence",
+
+        confidence
+
+    )
+
+
+    # ========================================================
+    # AI REASON
+    # ========================================================
+
+    st.info(
+
+        "💡 "
+
+        + strategy_result[
+            "reason"
+        ]
+
+    )
+
+
+    # ========================================================
+    # SIMULATION COMPARISON
+    # ========================================================
+
+    st.subheader(
+
+        "⚖️ Strategy Simulation"
+
+    )
+
+
+    sim_col1, sim_col2, sim_col3 = (
+
+        st.columns(3)
+
+    )
+
+
+    sim_col1.metric(
+
+        "Stay Out Time",
+
+        f"{strategy_result['stay_out_time']} sec"
+
+    )
+
+
+    sim_col2.metric(
+
+        "Pit Now Time",
+
+        f"{strategy_result['pit_now_time']} sec"
+
+    )
+
+
+    sim_col3.metric(
+
+        "Strategy Delta",
+
+        f"{strategy_result['delta']} sec"
+
+    )
+
+
+    # ========================================================
+    # CURRENT RACE STATE
+    # ========================================================
 
     st.subheader(
 
@@ -497,11 +830,21 @@ if st.sidebar.button(
 
         "Metric": [
 
+            "Season",
+
+            "Grand Prix",
+
+            "Session",
+
             "Driver",
+
+            "Track",
 
             "Lap",
 
             "Position",
+
+            "Tyre Compound",
 
             "Tyre Life",
 
@@ -517,7 +860,15 @@ if st.sidebar.button(
 
         "Value": [
 
+            season,
+
+            grand_prix,
+
+            session_type,
+
             driver,
+
+            track,
 
             latest[
                 "LapNumber"
@@ -526,6 +877,8 @@ if st.sidebar.button(
             latest[
                 "Position"
             ],
+
+            tyre_compound,
 
             latest[
                 "TyreLife"
@@ -575,9 +928,30 @@ if st.sidebar.button(
     )
 
 
-    # ==================================================
+    # ========================================================
+    # ML FEATURE TABLE
+    # ========================================================
+
+    with st.expander(
+
+        "🔍 View ML Model Features"
+
+    ):
+
+        st.dataframe(
+
+            model_input,
+
+            use_container_width=True,
+
+            hide_index=True
+
+        )
+
+
+    # ========================================================
     # LAP TIME GRAPH
-    # ==================================================
+    # ========================================================
 
     st.subheader(
 
@@ -594,8 +968,11 @@ if st.sidebar.button(
 
         y="LapTimeSeconds",
 
-        title=
+        title=(
+
             f"{driver} Lap Time Progression"
+
+        )
 
     )
 
@@ -609,9 +986,9 @@ if st.sidebar.button(
     )
 
 
-    # ==================================================
+    # ========================================================
     # PACE GRAPH
-    # ==================================================
+    # ========================================================
 
     st.subheader(
 
@@ -668,9 +1045,33 @@ if st.sidebar.button(
     )
 
 
-    st.caption(
+# ============================================================
+# DEFAULT LANDING MESSAGE
+# ============================================================
 
-        "F1 AI Strategy Engine — "
-        "V5 Foundation"
+else:
+
+    st.info(
+
+        "👈 Select a season, Grand Prix, session, "
+
+        "and driver from the sidebar, then click "
+
+        "**Analyze Strategy**."
 
     )
+
+
+# ============================================================
+# FOOTER
+# ============================================================
+
+st.divider()
+
+st.caption(
+
+    "F1 AI Strategy Engineer — "
+
+    "V5 Dynamic FastF1 Strategy Engine"
+
+)

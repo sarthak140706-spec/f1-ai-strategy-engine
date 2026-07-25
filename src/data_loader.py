@@ -31,7 +31,6 @@ def load_session(
     grand_prix: str,
     session_type: str = "R"
 ):
-
     """
     Load a FastF1 session.
 
@@ -45,32 +44,47 @@ def load_session(
 
     session_type : str
         Session identifier:
-        R  = Race
-        Q  = Qualifying
+        R   = Race
+        Q   = Qualifying
         FP1 = Free Practice 1
         FP2 = Free Practice 2
         FP3 = Free Practice 3
-        SQ = Sprint Qualifying
-        S  = Sprint
+        SQ  = Sprint Qualifying
+        S   = Sprint
 
     Returns
     -------
-    FastF1 Session
+    FastF1 Session or None
     """
 
-    session = fastf1.get_session(
-        season,
-        grand_prix,
-        session_type
-    )
+    try:
 
-    session.load()
+        session = fastf1.get_session(
+            season,
+            grand_prix,
+            session_type
+        )
 
-    return session
+        session.load()
+
+        return session
+
+    except Exception as e:
+
+        print(
+            f"❌ Failed to load session: "
+            f"{season} - {grand_prix} - {session_type}"
+        )
+
+        print(
+            f"Error: {e}"
+        )
+
+        return None
 
 
 # --------------------------------------------------
-# LOAD RACE DATA
+# LOAD RACE / SESSION DATA
 # --------------------------------------------------
 
 def load_race_data(
@@ -81,6 +95,11 @@ def load_race_data(
 
     """
     Load lap-level data for a selected F1 session.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Lap-level session data.
     """
 
     session = load_session(
@@ -88,6 +107,10 @@ def load_race_data(
         grand_prix,
         session_type
     )
+
+    if session is None:
+
+        return pd.DataFrame()
 
     return session.laps.copy()
 
@@ -102,13 +125,73 @@ def get_race_schedule(
 
     """
     Return the F1 event schedule for a season.
+
+    Returns
+    -------
+    pandas.DataFrame
+        F1 event schedule.
     """
 
-    schedule = fastf1.get_event_schedule(
+    try:
+
+        schedule = fastf1.get_event_schedule(
+            season
+        )
+
+        return schedule.copy()
+
+    except Exception as e:
+
+        print(
+            f"❌ Failed to load "
+            f"{season} F1 schedule."
+        )
+
+        print(
+            f"Error: {e}"
+        )
+
+        return pd.DataFrame()
+
+
+# --------------------------------------------------
+# GET AVAILABLE RACES
+# --------------------------------------------------
+
+def get_available_races(
+    season: int
+):
+
+    """
+    Return a list of available Grand Prix names
+    for a selected F1 season.
+
+    Returns
+    -------
+    list
+        List of Grand Prix event names.
+    """
+
+    schedule = get_race_schedule(
         season
     )
 
-    return schedule.copy()
+    if schedule.empty:
+
+        return []
+
+    if "EventName" not in schedule.columns:
+
+        return []
+
+    races = (
+        schedule["EventName"]
+        .dropna()
+        .unique()
+        .tolist()
+    )
+
+    return races
 
 
 # --------------------------------------------------
@@ -126,6 +209,11 @@ def get_available_drivers(
     in the selected session.
 
     No hardcoded driver list is required.
+
+    Returns
+    -------
+    list
+        List of driver abbreviations.
     """
 
     session = load_session(
@@ -134,6 +222,18 @@ def get_available_drivers(
         session_type
     )
 
+    if session is None:
+
+        return []
+
+    if session.laps.empty:
+
+        return []
+
+    if "Driver" not in session.laps.columns:
+
+        return []
+
     drivers = (
         session.laps["Driver"]
         .dropna()
@@ -141,7 +241,9 @@ def get_available_drivers(
         .tolist()
     )
 
-    return sorted(drivers)
+    return sorted(
+        drivers
+    )
 
 
 # --------------------------------------------------
@@ -157,6 +259,11 @@ def get_driver_laps(
 
     """
     Return lap data for one selected driver.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Lap data for the selected driver.
     """
 
     laps = load_race_data(
@@ -164,6 +271,14 @@ def get_driver_laps(
         grand_prix,
         session_type
     )
+
+    if laps.empty:
+
+        return pd.DataFrame()
+
+    if "Driver" not in laps.columns:
+
+        return pd.DataFrame()
 
     driver_laps = laps[
         laps["Driver"] == driver
