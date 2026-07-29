@@ -14,7 +14,10 @@ from src.strategy.strategy_generator import (
 from src.strategy.simulator import (
     simulate_strategy
 )
-
+from src.strategy.tyre_strategy import (
+    evaluate_all_compounds,
+    select_optimal_tyre_strategy
+)
 
 # ============================================================
 # SIMULATE A SINGLE STRATEGY
@@ -430,6 +433,306 @@ def optimise_pit_windows(
 
     return optimised
 
+
+# ============================================================
+# TYRE INTELLIGENCE INTEGRATION
+# ============================================================
+
+def apply_tyre_intelligence(
+    strategy: dict,
+    race_state: dict
+) -> dict:
+    """
+    Apply Sprint 4 tyre degradation intelligence
+    to a candidate race strategy.
+    """
+
+    base_lap_time = race_state.get(
+        "AvgPaceLast5"
+    )
+
+    if base_lap_time is None:
+
+        base_lap_time = race_state.get(
+            "AveragePace"
+        )
+
+    if base_lap_time is None:
+
+        raise ValueError(
+            "Race state is missing AvgPaceLast5 or AveragePace."
+        )
+
+    current_lap = race_state.get(
+        "CurrentLap",
+        0
+    )
+
+    pit_lap = strategy.get(
+        "pit_lap"
+    )
+
+    compound = strategy.get(
+        "compound_after_pit"
+    )
+
+    laps_remaining = race_state.get(
+        "LapsRemaining"
+    )
+
+    if pit_lap is None:
+
+        raise ValueError(
+            "Strategy is missing pit_lap."
+        )
+
+    if compound is None:
+
+        raise ValueError(
+            "Strategy is missing compound_after_pit."
+        )
+
+    if laps_remaining is None:
+
+        raise ValueError(
+            "Race state is missing LapsRemaining."
+        )
+
+    # --------------------------------------------------------
+    # CALCULATE STINT LENGTH AFTER PIT
+    # --------------------------------------------------------
+
+    laps_after_pit = (
+
+        laps_remaining
+
+        - (
+
+            pit_lap
+
+            - current_lap
+
+        )
+
+    )
+
+    if laps_after_pit <= 0:
+
+        strategy[
+            "TyreIntelligenceScore"
+        ] = 0
+
+        strategy[
+            "TyreIntelligenceEvaluation"
+        ] = "Invalid"
+
+        return strategy
+
+    # --------------------------------------------------------
+    # EVALUATE ALL COMPOUNDS
+    # --------------------------------------------------------
+
+    compound_results = evaluate_all_compounds(
+
+        base_lap_time=float(
+            base_lap_time
+        ),
+
+        tyre_age=0,
+
+        stint_length=int(
+            laps_after_pit
+        )
+
+    )
+
+    # --------------------------------------------------------
+    # FIND SELECTED COMPOUND
+    # --------------------------------------------------------
+
+    selected_compound = None
+
+    for result in compound_results:
+
+        if result.get(
+            "Compound"
+        ) == compound:
+
+            selected_compound = result
+
+            break
+
+    if selected_compound is None:
+
+        strategy[
+            "TyreIntelligenceScore"
+        ] = 0
+
+        strategy[
+            "TyreIntelligenceEvaluation"
+        ] = "Unknown Compound"
+
+        return strategy
+
+    # --------------------------------------------------------
+    # STORE TYRE INTELLIGENCE
+    # --------------------------------------------------------
+
+    strategy[
+        "TyreStintLength"
+    ] = selected_compound[
+        "StintLength"
+    ]
+
+    strategy[
+        "TyreDegradationImpact"
+    ] = selected_compound[
+        "DegradationImpact"
+    ]
+
+    strategy[
+        "TyreStrategyQuality"
+    ] = selected_compound[
+        "StrategyQuality"
+    ]
+
+    strategy[
+        "TyreDegradationEvaluation"
+    ] = selected_compound[
+        "DegradationEvaluation"
+    ]
+
+    # --------------------------------------------------------
+    # FIND BEST COMPOUND
+    # --------------------------------------------------------
+
+    best_compound = select_optimal_tyre_strategy(
+
+        compound_results
+
+    )
+
+    if best_compound is None:
+
+        strategy[
+            "TyreIntelligenceScore"
+        ] = 0
+
+        strategy[
+            "TyreIntelligenceEvaluation"
+        ] = "Unavailable"
+
+        return strategy
+
+    # --------------------------------------------------------
+    # COMPARE SELECTED COMPOUND WITH BEST COMPOUND
+    # --------------------------------------------------------
+
+    best_time = best_compound[
+        "TotalStintTime"
+    ]
+
+    selected_time = selected_compound[
+        "TotalStintTime"
+    ]
+
+    time_difference = (
+
+        selected_time
+
+        - best_time
+
+    )
+
+    # --------------------------------------------------------
+    # CALCULATE TYRE INTELLIGENCE SCORE
+    # --------------------------------------------------------
+
+    tyre_score = max(
+
+        0,
+
+        100
+
+        - (
+
+            time_difference * 5
+
+        )
+
+    )
+
+    strategy[
+        "TyreIntelligenceScore"
+    ] = round(
+
+        tyre_score,
+
+        2
+
+    )
+
+    # --------------------------------------------------------
+    # TYRE EVALUATION
+    # --------------------------------------------------------
+
+    if tyre_score >= 90:
+
+        evaluation = "Excellent"
+
+    elif tyre_score >= 75:
+
+        evaluation = "Good"
+
+    elif tyre_score >= 50:
+
+        evaluation = "Average"
+
+    else:
+
+        evaluation = "Poor"
+
+    strategy[
+        "TyreIntelligenceEvaluation"
+    ] = evaluation
+
+    return strategy
+
+
+# ============================================================
+# APPLY TYRE INTELLIGENCE TO ALL STRATEGIES
+# ============================================================
+
+def apply_tyre_intelligence_to_strategies(
+    strategies: list,
+    race_state: dict
+) -> list:
+    """
+    Apply tyre degradation intelligence to
+    every candidate strategy.
+    """
+
+    enhanced_strategies = []
+
+    for strategy in strategies:
+
+        enhanced = apply_tyre_intelligence(
+
+            strategy,
+
+            race_state
+
+        )
+
+        enhanced_strategies.append(
+
+            enhanced
+
+        )
+
+    return enhanced_strategies
+
+
 # ============================================================
 # STRATEGY RANKING ENGINE
 # ============================================================
@@ -458,26 +761,38 @@ def calculate_strategy_score(
         0
     )
 
+    tyre_score = strategy.get(
+        "TyreIntelligenceScore",
+        0
+    )
+
     total_score = (
 
-        compound_score * 0.40
+        compound_score * 0.30
 
         +
 
-        pit_score * 0.30
+        pit_score * 0.20
+
+        +
+
+        tyre_score * 0.30
 
         +
 
         max(
             0,
             100 - (race_time / 100)
-        ) * 0.30
+        ) * 0.20
 
     )
 
     strategy["StrategyScore"] = round(
+
         total_score,
+
         2
+
     )
 
     return strategy
@@ -594,34 +909,102 @@ def run_strategy_pipeline(
 ) -> dict:
     """
     Execute the complete strategy optimisation pipeline.
+
+    Pipeline:
+
+        Generate Strategies
+                ↓
+        Simulate Strategies
+                ↓
+        Evaluate Tyre Compound
+                ↓
+        Optimise Pit Windows
+                ↓
+        Apply Tyre Intelligence
+                ↓
+        Rank Strategies
+                ↓
+        Select Optimal Strategy
     """
 
+    # --------------------------------------------------------
+    # GENERATE + SIMULATE
+    # --------------------------------------------------------
+
     simulated = simulate_candidate_strategies(
+
         race_state,
+
         track
+
     )
+
+    # --------------------------------------------------------
+    # EVALUATE TYRE COMPOUND
+    # --------------------------------------------------------
 
     evaluated = evaluate_all_strategies(
+
         simulated,
+
         race_state
+
     )
+
+    # --------------------------------------------------------
+    # OPTIMISE PIT WINDOWS
+    # --------------------------------------------------------
 
     optimised = optimise_pit_windows(
+
         evaluated,
+
         race_state
+
     )
+
+    # --------------------------------------------------------
+    # APPLY SPRINT 4 TYRE INTELLIGENCE
+    # --------------------------------------------------------
+
+    tyre_intelligent = (
+        apply_tyre_intelligence_to_strategies(
+
+            optimised,
+
+            race_state
+
+        )
+    )
+
+    # --------------------------------------------------------
+    # RANK STRATEGIES
+    # --------------------------------------------------------
 
     ranked = rank_strategies(
-        optimised
+
+        tyre_intelligent
+
     )
 
+    # --------------------------------------------------------
+    # SELECT BEST STRATEGY
+    # --------------------------------------------------------
+
     best = select_optimal_strategy(
+
         ranked
+
     )
 
     return {
-        "best_strategy": best,
-        "ranked_strategies": ranked
+
+        "best_strategy":
+            best,
+
+        "ranked_strategies":
+            ranked
+
     }
 
 # ============================================================
@@ -657,7 +1040,133 @@ def generate_strategy_recommendation(
 
     return recommendation
 
+# ============================================================
+# TYRE STRATEGY EXPLANATION
+# ============================================================
 
+def generate_tyre_explanation(
+    strategy: dict | None
+) -> str:
+    """
+    Generate a detailed explanation describing
+    why the selected tyre strategy was chosen.
+    """
+
+    if strategy is None:
+
+        return (
+            "No tyre strategy explanation "
+            "is available."
+        )
+
+    compound = strategy.get(
+        "compound_after_pit",
+        "Unknown"
+    )
+
+    degradation = strategy.get(
+        "TyreDegradationImpact",
+        0
+    )
+
+    stint = strategy.get(
+        "TyreStintLength",
+        0
+    )
+
+    quality = strategy.get(
+        "TyreStrategyQuality",
+        "Unknown"
+    )
+
+    evaluation = strategy.get(
+        "TyreIntelligenceEvaluation",
+        "Unknown"
+    )
+
+    score = strategy.get(
+        "TyreIntelligenceScore",
+        0
+    )
+
+    explanation = (
+        f"Selected Compound : {compound}\n"
+        f"Recommended Stint : {stint} laps\n"
+        f"Estimated Degradation : "
+        f"{degradation:.2f} sec\n"
+        f"Strategy Quality : {quality}\n"
+        f"Evaluation : {evaluation}\n"
+        f"Tyre Intelligence Score : {score}"
+    )
+
+    return explanation
+
+# ============================================================
+# TYRE INTELLIGENCE SUMMARY
+# ============================================================
+
+def generate_tyre_summary(
+    strategy: dict | None
+) -> dict:
+    """
+    Generate a structured summary of the tyre
+    intelligence for the selected strategy.
+
+    This summary is intended for downstream
+    strategy modules in future sprints.
+    """
+
+    if strategy is None:
+
+        return {
+
+            "Compound": None,
+
+            "StintLength": None,
+
+            "DegradationImpact": None,
+
+            "StrategyQuality": None,
+
+            "TyreScore": 0,
+
+            "Evaluation": "Unavailable"
+
+        }
+
+    return {
+
+        "Compound":
+            strategy.get(
+                "compound_after_pit"
+            ),
+
+        "StintLength":
+            strategy.get(
+                "TyreStintLength"
+            ),
+
+        "DegradationImpact":
+            strategy.get(
+                "TyreDegradationImpact"
+            ),
+
+        "StrategyQuality":
+            strategy.get(
+                "TyreStrategyQuality"
+            ),
+
+        "TyreScore":
+            strategy.get(
+                "TyreIntelligenceScore"
+            ),
+
+        "Evaluation":
+            strategy.get(
+                "TyreIntelligenceEvaluation"
+            )
+
+    }
 # ============================================================
 # TEST
 # ============================================================
@@ -673,7 +1182,7 @@ if __name__ == "__main__":
     )
 
     print("=" * 60)
-    print("SPRINT 3 - STEP 8 TEST")
+    print("SPRINT 4 - STEP 8 TEST")
     print("=" * 60)
 
     session = load_session(
@@ -713,6 +1222,23 @@ if __name__ == "__main__":
 
         print(strategy)
 
+        print(
+            f"Tyre Intelligence Score: "
+            f"{strategy.get('TyreIntelligenceScore', 0)}"
+        )
+
+        print(
+            f"Tyre Evaluation: "
+            f"{strategy.get('TyreIntelligenceEvaluation', 'N/A')}"
+        )
+
+        print(
+            f"Degradation Impact: "
+            f"{strategy.get('TyreDegradationImpact', 'N/A')}"
+        )
+
+        print("-" * 60)
+
     display_best_strategy(
 
         best
@@ -730,6 +1256,28 @@ if __name__ == "__main__":
 
     print(recommendation)
 
+    print("\nTYRE STRATEGY EXPLANATION")
     print("=" * 60)
-    print("STEP 8 COMPLETED")
+
+    print(
+
+        generate_tyre_explanation(
+
+            best
+
+        )
+
+    )
+
+    print("\nTYRE INTELLIGENCE SUMMARY")
     print("=" * 60)
+
+    summary = generate_tyre_summary(
+
+        best
+
+    )
+
+    for key, value in summary.items():
+
+        print(f"{key}: {value}")
