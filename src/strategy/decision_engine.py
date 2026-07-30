@@ -7,7 +7,16 @@ from src.predict import (
 from src.strategy.simulator import (
     simulate_strategy
 )
+from src.strategy.context_score import (
+    calculate_race_context_score
+)
 
+from src.strategy.undercut_overcut import (
+    analyse_undercut_overcut
+)
+from src.strategy.recommendation_engine import (
+    generate_strategy_explanation
+)
 
 # ============================================================
 # CONFIGURATION
@@ -246,7 +255,136 @@ def generate_reason(
 
     )
 
+# ============================================================
+# SPRINT 5 - RACE CONTEXT INTEGRATION
+# ============================================================
 
+def apply_race_context(
+    race_state: Dict[str, Any],
+    decision_result: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Integrate Sprint 5 race awareness
+    into final strategy decision.
+    """
+
+
+    # --------------------------------------------------------
+    # Undercut / Overcut Analysis
+    # --------------------------------------------------------
+
+    undercut_result = analyse_undercut_overcut(
+        race_state
+    )
+
+
+    # --------------------------------------------------------
+    # Build Context Input
+    # --------------------------------------------------------
+
+    context_input = {
+
+
+        "SafetyCar":
+            race_state.get(
+                "SafetyCar",
+                False
+            ),
+
+
+        "VSC":
+            race_state.get(
+                "VSC",
+                False
+            ),
+
+
+        "WeatherFactor":
+            race_state.get(
+                "WeatherFactor",
+                0
+            ),
+
+
+        "TrafficRisk":
+            race_state.get(
+                "TrafficRisk",
+                "Low"
+            ),
+
+
+        "GapAhead":
+            race_state.get(
+                "GapAhead",
+                999
+            ),
+
+
+        "GapBehind":
+            race_state.get(
+                "GapBehind",
+                999
+            ),
+
+
+        "UndercutScore":
+            undercut_result[
+                "UndercutScore"
+            ],
+
+
+        "OvercutScore":
+            undercut_result[
+                "OvercutScore"
+            ]
+
+    }
+
+
+    # --------------------------------------------------------
+    # Calculate Race Context Score
+    # --------------------------------------------------------
+
+    context_result = calculate_race_context_score(
+        context_input
+    )
+
+
+    # --------------------------------------------------------
+    # Attach To Final Decision
+    # --------------------------------------------------------
+
+    decision_result.update({
+
+        "undercut_overcut":
+            undercut_result,
+
+
+        "race_context":
+            context_result,
+
+
+        "race_context_score":
+            context_result[
+                "RaceContextScore"
+            ],
+
+
+        "race_situation":
+            context_result[
+                "Situation"
+            ],
+
+
+        "context_confidence":
+            context_result[
+                "Confidence"
+            ]
+
+    })
+
+
+    return decision_result
 # ============================================================
 # GET STRATEGY DECISION
 # ============================================================
@@ -736,7 +874,18 @@ def get_decision_from_race_state(
         model_data=model_data
 
     )
+    decision = apply_race_context(
 
+        race_state,
+
+        decision
+
+    )
+    decision["ai_explanation"] = (
+        generate_strategy_explanation(
+            decision
+        )
+    )
     # ========================================================
     # ADD RACE STATE INFORMATION
     # ========================================================
@@ -912,6 +1061,39 @@ def get_decision_from_race_state(
                 "reason"
             ),
 
+
+        # ----------------------------------------------------
+        # Sprint 5 Race Context
+        # ----------------------------------------------------
+
+        "race_context_score":
+            decision.get(
+                "race_context_score"
+            ),
+
+        "race_situation":
+            decision.get(
+                "race_situation"
+            ),
+
+        "context_confidence":
+            decision.get(
+                "context_confidence"
+            ),
+
+        "undercut_overcut":
+            decision.get(
+                "undercut_overcut"
+            ),
+
+        # ----------------------------------------------------
+        # Sprint 5 AI Recommendation
+        # ----------------------------------------------------
+
+        "ai_explanation":
+            decision.get(
+                "ai_explanation"
+            ),
         # ----------------------------------------------------
         # ML Features
         # ----------------------------------------------------
@@ -962,7 +1144,7 @@ if __name__ == "__main__":
     )
 
     print(
-        "V5 SPRINT 2 - DYNAMIC DECISION ENGINE TEST"
+        "V5 SPRINT 5 - RACE CONTEXT STRATEGY TEST"
     )
 
     print(
@@ -1112,7 +1294,31 @@ if __name__ == "__main__":
         f"Confidence: "
         f"{result['confidence']}"
     )
+    print(
+    f"\nRace Context Score: "
+    f"{result.get('race_context_score')}"
+)
 
+    print(
+        f"Race Situation: "
+        f"{result.get('race_situation')}"
+    )
+
+    print(
+        f"Context Confidence: "
+        f"{result.get('context_confidence')}"
+    )
+
+
+    print(
+        "\nUndercut / Overcut:"
+    )
+
+    print(
+        result.get(
+            "undercut_overcut"
+        )
+    )
     print(
         f"\nReason:"
     )
@@ -1120,7 +1326,15 @@ if __name__ == "__main__":
     print(
         result["reason"]
     )
+    print(
+    "\nAI Strategy Recommendation:"
+    )
 
+    print(
+        result.get(
+            "ai_explanation"
+        )
+    )
     print(
         "=" * 70
     )

@@ -1,5 +1,3 @@
-import joblib
-
 from xgboost import XGBClassifier
 
 from sklearn.metrics import (
@@ -14,11 +12,21 @@ from sklearn.model_selection import (
 
 from imblearn.over_sampling import SMOTE
 
+import os
+
+
+# ============================================================
+# MODEL PATH
+# ============================================================
 
 MODEL_PATH = (
-    "models/pit_strategy_model.pkl"
+    "models/pit_strategy_model.json"
 )
 
+
+# ============================================================
+# TRAIN MODEL
+# ============================================================
 
 def train_model(
     model_data
@@ -34,23 +42,21 @@ def train_model(
         "PitNextLap"
     ]
 
-    X_train, X_test, y_train, y_test = (
 
-        train_test_split(
+    X_train, X_test, y_train, y_test = train_test_split(
 
-            X,
+        X,
 
-            y,
+        y,
 
-            test_size=0.2,
+        test_size=0.2,
 
-            random_state=42,
+        random_state=42,
 
-            stratify=y
-
-        )
+        stratify=y
 
     )
+
 
     # ------------------------------------------
     # HANDLE CLASS IMBALANCE
@@ -60,14 +66,15 @@ def train_model(
         random_state=42
     )
 
-    X_train, y_train = (
 
-        smote.fit_resample(
-            X_train,
-            y_train
-        )
+    X_train, y_train = smote.fit_resample(
+
+        X_train,
+
+        y_train
 
     )
+
 
     # ------------------------------------------
     # MODEL
@@ -87,10 +94,15 @@ def train_model(
 
     )
 
+
     model.fit(
+
         X_train,
+
         y_train
+
     )
+
 
     # ------------------------------------------
     # EVALUATION
@@ -100,51 +112,124 @@ def train_model(
         X_test
     )
 
+
     y_probability = (
+
         model.predict_proba(
             X_test
         )[:, 1]
+
     )
+
 
     print(
         "\nClassification Report:"
     )
 
     print(
+
         classification_report(
             y_test,
             y_pred
         )
+
     )
 
+
     print(
+
         "Accuracy:",
+
         accuracy_score(
             y_test,
             y_pred
         )
+
     )
 
+
     print(
+
         "ROC-AUC:",
+
         roc_auc_score(
             y_test,
             y_probability
         )
+
     )
 
+
     # ------------------------------------------
-    # SAVE MODEL
+    # SAVE MODEL (XGBOOST NATIVE FORMAT)
     # ------------------------------------------
 
-    joblib.dump(
-        model,
+    os.makedirs(
+
+        "models",
+
+        exist_ok=True
+
+    )
+
+
+    model.save_model(
+
         MODEL_PATH
+
     )
+
 
     print(
-        f"\n✅ Model saved to: "
-        f"{MODEL_PATH}"
+
+        f"\n✅ Model saved to: {MODEL_PATH}"
+
     )
 
+
     return model
+
+# ============================================================
+# DIRECT TRAINING EXECUTION
+# ============================================================
+
+if __name__ == "__main__":
+
+    from src.build_dataset import build_dataset
+
+
+    print("=" * 70)
+
+    print(
+        "F1 AI STRATEGIST - XGBOOST TRAINING"
+    )
+
+    print("=" * 70)
+
+
+    print(
+        "\n[1/2] Building training dataset..."
+    )
+
+
+    model_data = build_dataset()
+
+
+    print(
+        "✓ Dataset generated"
+    )
+
+
+    print(
+        "\n[2/2] Training model..."
+    )
+
+
+    train_model(
+        model_data
+    )
+
+
+    print(
+        "\n✅ TRAINING COMPLETED"
+    )

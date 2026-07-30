@@ -19,6 +19,29 @@ from src.strategy.tyre_strategy import (
     select_optimal_tyre_strategy
 )
 
+from src.strategy.safety_car import (
+    detect_safety_car
+)
+
+from src.strategy.weather_model import (
+    get_weather,
+    evaluate_weather_risk
+)
+
+from src.strategy.traffic_model import (
+    get_traffic_data,
+    evaluate_traffic
+)
+
+from src.strategy.gap_model import (
+    get_gap_information,
+    evaluate_gap
+)
+
+from src.strategy.overtake_model import (
+    analyse_overtake_strategy
+)
+
 # ============================================================
 # SIMULATE A SINGLE STRATEGY
 # ============================================================
@@ -731,7 +754,148 @@ def apply_tyre_intelligence_to_strategies(
         )
 
     return enhanced_strategies
+# ============================================================
+# RACE SITUATION AWARENESS
+# ============================================================
 
+def apply_race_situation_awareness(
+    strategy: dict,
+    race_state: dict,
+    session
+) -> dict:
+    """
+    Apply Sprint 5 race awareness to a strategy.
+    """
+
+    driver = race_state["Driver"]
+
+    safety = detect_safety_car(
+        session
+    )
+
+    weather = evaluate_weather_risk(
+
+        get_weather(
+            session
+        )
+
+    )
+
+    traffic = evaluate_traffic(
+
+        get_traffic_data(
+            session,
+            driver
+        )
+
+    )
+
+    gap = evaluate_gap(
+
+        get_gap_information(
+            session,
+            driver
+        )
+
+    )
+
+    overtake = analyse_overtake_strategy(
+
+        gap,
+
+        race_state
+
+    )
+
+    score = 100
+
+    if safety["SafetyCar"]:
+
+        score += 20
+
+    if safety["VirtualSafetyCar"]:
+
+        score += 10
+
+    if weather["WeatherRisk"] == "HIGH":
+
+        score -= 20
+
+    elif weather["WeatherRisk"] == "MEDIUM":
+
+        score -= 10
+
+    if traffic["TrafficRisk"] == "HIGH":
+
+        score -= 15
+
+    elif traffic["TrafficRisk"] == "MEDIUM":
+
+        score -= 8
+
+    if overtake["UndercutAvailable"]:
+
+        score += 10
+
+    if overtake["OvercutAvailable"]:
+
+        score += 5
+
+    score = max(
+        0,
+        min(
+            100,
+            score
+        )
+    )
+
+    strategy["RaceAwarenessScore"] = score
+
+    strategy["SafetyCar"] = safety["SafetyCar"]
+
+    strategy["VSC"] = safety["VirtualSafetyCar"]
+
+    strategy["WeatherRisk"] = weather["WeatherRisk"]
+
+    strategy["TrafficRisk"] = traffic["TrafficRisk"]
+
+    strategy["GapStatus"] = gap["GapStatus"]
+
+    strategy["OvertakeRecommendation"] = (
+        overtake["Recommendation"]
+    )
+
+    return strategy
+
+# ============================================================
+# APPLY TO ALL STRATEGIES
+# ============================================================
+
+def apply_race_awareness_to_all(
+    strategies: list,
+    race_state: dict,
+    session
+) -> list:
+
+    enhanced = []
+
+    for strategy in strategies:
+
+        enhanced.append(
+
+            apply_race_situation_awareness(
+
+                strategy,
+
+                race_state,
+
+                session
+
+            )
+
+        )
+
+    return enhanced
 
 # ============================================================
 # STRATEGY RANKING ENGINE
@@ -910,7 +1074,7 @@ def run_strategy_pipeline(
     """
     Execute the complete strategy optimisation pipeline.
 
-    Pipeline:
+    Sprint 5 Pipeline
 
         Generate Strategies
                 ↓
@@ -922,88 +1086,121 @@ def run_strategy_pipeline(
                 ↓
         Apply Tyre Intelligence
                 ↓
+        Apply Safety Car Intelligence
+                ↓
+        Apply VSC Intelligence
+                ↓
+        Apply Weather Intelligence
+                ↓
+        Apply Traffic Intelligence
+                ↓
+        Apply Gap Intelligence
+                ↓
+        Apply Undercut / Overcut Intelligence
+                ↓
+        Apply Race Context Intelligence
+                ↓
         Rank Strategies
                 ↓
-        Select Optimal Strategy
+        Select Best Strategy
     """
 
     # --------------------------------------------------------
-    # GENERATE + SIMULATE
+    # Strategy Generation
     # --------------------------------------------------------
 
     simulated = simulate_candidate_strategies(
-
         race_state,
-
         track
-
     )
 
     # --------------------------------------------------------
-    # EVALUATE TYRE COMPOUND
+    # Tyre Compound Evaluation
     # --------------------------------------------------------
 
     evaluated = evaluate_all_strategies(
-
         simulated,
-
         race_state
-
     )
 
     # --------------------------------------------------------
-    # OPTIMISE PIT WINDOWS
+    # Pit Window Optimisation
     # --------------------------------------------------------
 
     optimised = optimise_pit_windows(
-
         evaluated,
-
         race_state
-
     )
 
     # --------------------------------------------------------
-    # APPLY SPRINT 4 TYRE INTELLIGENCE
+    # Sprint 4 Tyre Intelligence
     # --------------------------------------------------------
 
-    tyre_intelligent = (
-        apply_tyre_intelligence_to_strategies(
-
-            optimised,
-
-            race_state
-
-        )
+    tyre_intelligent = apply_tyre_intelligence_to_strategies(
+        optimised,
+        race_state
     )
 
     # --------------------------------------------------------
-    # RANK STRATEGIES
+    # Sprint 5 Intelligence Modules
+    # --------------------------------------------------------
+
+    safety_car = apply_safety_car_to_strategies(
+        tyre_intelligent,
+        race_state
+    )
+
+    vsc = apply_vsc_to_strategies(
+        safety_car,
+        race_state
+    )
+
+    weather = apply_weather_to_strategies(
+        vsc,
+        race_state
+    )
+
+    traffic = apply_traffic_to_strategies(
+        weather,
+        race_state
+    )
+
+    gaps = apply_gap_to_strategies(
+        traffic,
+        race_state
+    )
+
+    undercut = apply_undercut_overcut_to_strategies(
+        gaps,
+        race_state
+    )
+
+    contextual = apply_race_context_to_strategies(
+        undercut,
+        race_state
+    )
+
+    # --------------------------------------------------------
+    # Ranking
     # --------------------------------------------------------
 
     ranked = rank_strategies(
-
-        tyre_intelligent
-
+        contextual
     )
 
     # --------------------------------------------------------
-    # SELECT BEST STRATEGY
+    # Best Strategy
     # --------------------------------------------------------
 
     best = select_optimal_strategy(
-
         ranked
-
     )
 
     return {
 
-        "best_strategy":
-            best,
+        "best_strategy": best,
 
-        "ranked_strategies":
-            ranked
+        "ranked_strategies": ranked
 
     }
 
