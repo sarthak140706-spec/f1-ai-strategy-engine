@@ -1616,7 +1616,7 @@ function setText(
 
 /*==========================================================
   LOAD RACE RESULTS
-  PHASE 2.3.1 / 2.3.2
+  PRODUCTION-SAFE VERSION
 ==========================================================*/
 
 async function loadRaceResults(
@@ -1627,134 +1627,107 @@ async function loadRaceResults(
         historicalState.season;
 
 
-    if (!season) {
-
-        throw new Error(
-            "Season is not selected."
-        );
-
-    }
-
-
     if (
-        !grandPrix ||
-        !String(
-            grandPrix
-        ).trim()
+        !season ||
+        !grandPrix
     ) {
 
-        throw new Error(
-            "Grand Prix is not selected."
-        );
+        return null;
 
     }
 
-
-    /*
-    ----------------------------------------------------------
-    Always clear the previous race classification first.
-    ----------------------------------------------------------
-    */
 
     clearRaceResults();
 
 
-    const encodedGrandPrix =
-        encodeURIComponent(
+    const encodedRace =
+        String(
             grandPrix
+        )
+        .trim()
+        .replace(
+            /\s+/g,
+            "_"
         );
 
 
-    /*
-    ----------------------------------------------------------
-    Try the project's historical race-result endpoint patterns.
-
-    The first successful endpoint is used.
-    ----------------------------------------------------------
-    */
-
-    const endpoints = [
-
-        `/api/historical/${season}/${encodedGrandPrix}/results`,
-
-        `/api/historical/results?season=${season}&grand_prix=${encodedGrandPrix}`,
-
-        `/api/historical/race-results?season=${season}&grand_prix=${encodedGrandPrix}`,
-
-        `/api/historical/${season}/results?grand_prix=${encodedGrandPrix}`
-
-    ];
+    const endpoint =
+        `/api/race/${season}/${encodeURIComponent(encodedRace)}/results`;
 
 
-    let data = null;
-
-    let lastError = null;
-
-
-    for (const endpoint of endpoints) {
-
-        try {
-
-            data =
-                await historicalFetch(
-                    endpoint
-                );
-
-
-            if (data) {
-
-                break;
-
-            }
-
-        }
-
-        catch (error) {
-
-            lastError =
-                error;
-
-        }
-
-    }
-
-
-    if (!data) {
-
-        throw (
-            lastError
-            ||
-            new Error(
-                "Unable to load official race results."
-            )
-        );
-
-    }
-
-
-    historicalState.raceResults =
-        data;
-
-
-    /*
-    ----------------------------------------------------------
-    IMPORTANT:
-    Previous code checked whether displayRaceResults existed,
-    but no renderer was actually defined.
-
-    The renderer now exists below and is called directly.
-    ----------------------------------------------------------
-    */
-
-    displayRaceResults(
-        data
+    console.log(
+        "Loading race results from:",
+        endpoint
     );
 
 
-    return data;
+    try {
+
+        const data =
+            await historicalFetch(
+                endpoint
+            );
+
+
+        if (!data) {
+
+            throw new Error(
+                "No race results received."
+            );
+
+        }
+
+
+        if (data.error) {
+
+            throw new Error(
+                data.error
+            );
+
+        }
+
+
+        historicalState.raceResults =
+            data;
+
+
+        displayRaceResults(
+            data
+        );
+
+
+        console.log(
+            "✅ Race results loaded successfully.",
+            data
+        );
+
+
+        return data;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Race results loading error:",
+            error
+        );
+
+
+        historicalState.raceResults =
+            null;
+
+
+        displayEmptyRaceResults(
+            "Unable to load official race results."
+        );
+
+
+        return null;
+
+    }
 
 }
-
 
 /*==========================================================
   EXTRACT RACE RESULT ROWS
@@ -3577,167 +3550,16 @@ function displayRaceResults(
 
 
 /*==========================================================
-  IMPORTANT:
   BACKEND-COMPATIBLE LOAD RACE RESULTS
-
-  This uses the API helper already present in your api.js
-  first, matching your original historical.js.
 ==========================================================*/
 
 async function loadRaceResultsCompatible(
     grandPrix
 ) {
 
-    const season =
-        historicalState.season;
-
-
-    if (
-        !season ||
-        !grandPrix
-    ) {
-
-        return null;
-
-    }
-
-
-    console.log(
-        "Loading official race results:",
-        season,
+    return await loadRaceResults(
         grandPrix
     );
-
-
-    try {
-
-        let data;
-
-
-        /*====================================================
-          PRIMARY METHOD:
-          Existing api.js function
-        ====================================================*/
-
-        if (
-            typeof getRaceResults ===
-            "function"
-        ) {
-
-            data =
-                await getRaceResults(
-                    season,
-                    grandPrix
-                );
-
-        }
-
-
-        /*====================================================
-          FALLBACK:
-          Original project Flask endpoint
-        ====================================================*/
-
-        else {
-
-            const encodedRace =
-                String(
-                    grandPrix
-                )
-                .replace(
-                    / /g,
-                    "_"
-                );
-
-
-            const response =
-                await fetch(
-
-                    `/api/race/${season}/${encodeURIComponent(encodedRace)}/results`
-
-                );
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    `Backend HTTP ${response.status}`
-                );
-
-            }
-
-
-            data =
-                await response.json();
-
-        }
-
-
-        if (!data) {
-
-            throw new Error(
-                "No race result response received."
-            );
-
-        }
-
-
-        if (data.error) {
-
-            throw new Error(
-                data.error
-            );
-
-        }
-
-
-        historicalState.raceResults =
-            data;
-
-
-        displayRaceResults(
-            data
-        );
-
-
-        console.log(
-            "✅ Race results loaded successfully."
-        );
-
-
-        return data;
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "Race results loading error:",
-            error
-        );
-
-
-        historicalState.raceResults =
-            null;
-
-
-        displayEmptyRaceResults(
-            "Unable to load official race results."
-        );
-
-
-        /*
-        ------------------------------------------------------
-        Do not throw here.
-
-        Race Information and session analytics should remain
-        usable even if the results endpoint fails.
-        ------------------------------------------------------
-        */
-
-        return null;
-
-    }
 
 }
 
