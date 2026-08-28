@@ -280,7 +280,11 @@ def load_session(
 
         )
 
-        session.load()
+        session.load(
+            telemetry=False,
+            weather=False,
+            messages=False
+        )
 
         return session
 
