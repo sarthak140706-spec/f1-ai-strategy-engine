@@ -2091,268 +2091,6 @@ function createRaceResultCell(
       Points
 ==========================================================*/
 
-function displayRaceResults(
-    data
-) {
-
-    const section = getElement(
-        "raceResults",
-        "officialRaceResults",
-        "race-results"
-    );
-
-
-    const body = getElement(
-        "raceResultsBody",
-        "officialRaceResultsBody",
-        "race-results-body"
-    );
-
-
-    const message = getElement(
-        "raceResultsMessage",
-        "race-results-message"
-    );
-
-
-    if (!body) {
-
-        console.warn(
-            "Race results table body was not found. " +
-            "Expected element id: raceResultsBody"
-        );
-
-        return;
-
-    }
-
-
-    const rows =
-        extractRaceResultRows(
-            data
-        );
-
-
-    body.innerHTML =
-        "";
-
-
-    /*
-    ----------------------------------------------------------
-    EMPTY RESULTS
-    ----------------------------------------------------------
-    */
-
-    if (
-        !rows.length
-    ) {
-
-        if (section) {
-
-            section.style.display =
-                "";
-
-        }
-
-
-        if (message) {
-
-            message.textContent =
-                "Official race results are unavailable for this event.";
-
-            message.style.display =
-                "block";
-
-        }
-
-
-        return;
-
-    }
-
-
-    if (message) {
-
-        message.textContent =
-            "";
-
-        message.style.display =
-            "none";
-
-    }
-
-
-    /*
-    ----------------------------------------------------------
-    BUILD CLASSIFICATION TABLE
-    ----------------------------------------------------------
-    */
-
-    rows.forEach(
-        (
-            rawResult,
-            index
-        ) => {
-
-            const result =
-                normaliseRaceResult(
-                    rawResult,
-                    index
-                );
-
-
-            const row =
-                document.createElement(
-                    "tr"
-                );
-
-
-            /*
-            --------------------------------------------------
-            Position
-            --------------------------------------------------
-            */
-
-            row.appendChild(
-
-                createRaceResultCell(
-
-                    formatPosition(
-                        result.position
-                    ),
-
-                    "race-result-position"
-
-                )
-
-            );
-
-
-            /*
-            --------------------------------------------------
-            Driver
-            --------------------------------------------------
-            */
-
-            row.appendChild(
-
-                createRaceResultCell(
-
-                    result.driver,
-
-                    "race-result-driver"
-
-                )
-
-            );
-
-
-            /*
-            --------------------------------------------------
-            Driver Number
-            --------------------------------------------------
-            */
-
-            row.appendChild(
-
-                createRaceResultCell(
-
-                    result.driverNumber,
-
-                    "race-result-number"
-
-                )
-
-            );
-
-
-            /*
-            --------------------------------------------------
-            Team
-            --------------------------------------------------
-            */
-
-            row.appendChild(
-
-                createRaceResultCell(
-
-                    result.team,
-
-                    "race-result-team"
-
-                )
-
-            );
-
-
-            /*
-            --------------------------------------------------
-            Laps
-            --------------------------------------------------
-            */
-
-            row.appendChild(
-
-                createRaceResultCell(
-
-                    result.laps,
-
-                    "race-result-laps"
-
-                )
-
-            );
-
-
-            /*
-            --------------------------------------------------
-            Points
-            --------------------------------------------------
-            */
-
-            row.appendChild(
-
-                createRaceResultCell(
-
-                    result.points,
-
-                    "race-result-points"
-
-                )
-
-            );
-
-
-            body.appendChild(
-                row
-            );
-
-        }
-    );
-
-
-    /*
-    ----------------------------------------------------------
-    SHOW THE OFFICIAL RACE RESULTS SECTION
-    ----------------------------------------------------------
-    */
-
-    if (section) {
-
-        section.style.display =
-            "";
-
-        section.hidden =
-            false;
-
-    }
-
-
-    console.log(
-        `[Historical Dashboard] Displayed ${rows.length} official race results.`
-    );
-
-}
 
 
 /*==========================================================
@@ -3557,9 +3295,116 @@ async function loadRaceResultsCompatible(
     grandPrix
 ) {
 
-    return await loadRaceResults(
+    const season =
+        historicalState.season;
+
+
+    if (
+        !season ||
+        !grandPrix
+    ) {
+
+        return null;
+
+    }
+
+
+    console.log(
+        "Loading official race results:",
+        season,
         grandPrix
     );
+
+
+    try {
+
+        const encodedRace =
+            String(
+                grandPrix
+            )
+            .replace(
+                / /g,
+                "_"
+            );
+
+
+        const response =
+            await fetch(
+                `/api/race/${season}/${encodeURIComponent(encodedRace)}/results`
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Backend HTTP ${response.status}`
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (!data) {
+
+            throw new Error(
+                "No race result response received."
+            );
+
+        }
+
+
+        if (data.error) {
+
+            throw new Error(
+                data.error
+            );
+
+        }
+
+
+        historicalState.raceResults =
+            data;
+
+
+        displayRaceResults(
+            data
+        );
+
+
+        console.log(
+            "✅ Race results loaded successfully:",
+            data.driver_count,
+            "drivers"
+        );
+
+
+        return data;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Race results loading error:",
+            error
+        );
+
+
+        historicalState.raceResults =
+            null;
+
+
+        displayEmptyRaceResults(
+            "Unable to load official race results."
+        );
+
+
+        return null;
+
+    }
 
 }
 
@@ -4052,39 +3897,21 @@ async function loadSelectedRaceCompatible(
 
 
         /*====================================================
-          LOAD SESSION DATA
+        LOAD OFFICIAL RACE RESULTS
         ====================================================*/
-
-        const sessionPromise =
-            loadSessionData(
-                grandPrix,
-                "R"
-            );
-
-
-        /*====================================================
-          LOAD OFFICIAL RACE RESULTS
-
-          This call was missing in your old code.
-        ====================================================*/
-
-        const resultsPromise =
-            loadRaceResultsCompatible(
-                grandPrix
-            );
-
-
-        await Promise.allSettled(
-            [
-                sessionPromise,
-                resultsPromise
-            ]
-        );
-
 
         console.log(
-            "✅ Historical race data loading completed."
+            "Loading official race results..."
         );
+
+        await loadRaceResultsCompatible(
+            grandPrix
+        );
+
+        console.log(
+            "✅ Official race results loading completed."
+        );
+
 
     }
 
