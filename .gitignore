@@ -70,3 +70,20 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
+@"
+
+# ==========================================
+# Deprecated Live Strategy Prototype
+# ==========================================
+
+api/live_routes.py
+data/live/
+frontend/css/live.css
+frontend/js/live.js
+frontend/live.html
+src/live/
+test_direct_live_source.py
+test_live_diagnostic.py
+test_real_live_f1.py
+"@ | Add-Content .gitignore
