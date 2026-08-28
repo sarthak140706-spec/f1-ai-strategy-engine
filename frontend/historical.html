@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Historical Race Analysis | F1 AI Strategist
+    </title>
+
+    <meta
+        name="description"
+        content="Historical Formula One race analysis powered by F1 AI Strategist."
+    >
+
+
+    <!-- =========================================================
+         GOOGLE FONT
+    ========================================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- =========================================================
+         MAIN CSS
+    ========================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="css/variables.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/reset.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/utilities.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/animations.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/responsive.css"
+    >
+
+
+    <!-- =========================================================
+         HISTORICAL PAGE STYLING
+    ========================================================== -->
+
+    <style>
+
+        /* =====================================================
+           COMMON HISTORICAL CARD
+        ====================================================== */
+
+        .historical-card {
+
+            width: 100%;
+
+            background:
+                rgba(20, 20, 20, 0.82);
+
+            border:
+                1px solid rgba(255, 255, 255, 0.10);
+
+            border-radius:
+                24px;
+
+            padding:
+                70px 60px;
+
+            text-align:
+                center;
+
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.25);
+
+        }
+
+
+        /* =====================================================
+           CARD DESCRIPTION
+        ====================================================== */
+
+        .historical-card-description {
+
+            width: 100%;
+
+            max-width:
+                900px;
+
+            margin:
+                0 auto;
+
+            font-size:
+                18px;
+
+            line-height:
+                1.7;
+
+            color:
+                rgba(255, 255, 255, 0.72);
+
+        }
+
+
+        /* =====================================================
+           RACE SELECTION GRID
+        ====================================================== */
+
+        .historical-selection-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap:
+                28px;
+
+            width:
+                100%;
+
+            max-width:
+                1000px;
+
+            margin:
+                40px auto 0;
+
+            text-align:
+                left;
+
+        }
+
+
+        /* =====================================================
+           SELECTION FIELD
+        ====================================================== */
+
+        .historical-field {
+
+            width:
+                100%;
+
+        }
+
+
+        .historical-field label {
+
+            display:
+                block;
+
+            margin-bottom:
+                10px;
+
+            font-size:
+                14px;
+
+            font-weight:
+                600;
+
+            color:
+                rgba(255, 255, 255, 0.78);
+
+        }
+
+
+        /* =====================================================
+           SELECT DROPDOWN
+        ====================================================== */
+
+        .historical-field select {
+
+            display:
+                block;
+
+            width:
+                100%;
+
+            min-height:
+                52px;
+
+            padding:
+                16px 18px;
+
+            border-radius:
+                12px;
+
+            border:
+                1px solid rgba(255, 255, 255, 0.14);
+
+            background:
+                #111827;
+
+            color:
+                #ffffff;
+
+            font-family:
+                inherit;
+
+            font-size:
+                15px;
+
+            font-weight:
+                500;
+
+            outline:
+                none;
+
+            cursor:
+                pointer;
+
+            position:
+                relative;
+
+            z-index:
+                9999;
+
+            appearance:
+                auto;
+
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                background 0.2s ease;
+
+        }
+
+
+        .historical-field select:hover {
+
+            border-color:
+                rgba(255, 255, 255, 0.28);
+
+        }
+
+
+        .historical-field select:focus {
+
+            border-color:
+                rgba(255, 70, 70, 0.60);
+
+            box-shadow:
+                0 0 0 3px rgba(255, 70, 70, 0.10);
+
+        }
+
+
+        .historical-field select option {
+
+            background:
+                #111827;
+
+            color:
+                #ffffff;
+
+        }
+
+
+        /* =====================================================
+           RACE INFORMATION GRID
+        ====================================================== */
+
+        .historical-race-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+
+            gap:
+                24px;
+
+            width:
+                100%;
+
+            max-width:
+                1100px;
+
+            margin:
+                45px auto 0;
+
+            text-align:
+                center;
+
+        }
+
+
+        /* =====================================================
+           RACE INFORMATION CARD
+        ====================================================== */
+
+        .historical-race-item {
+
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            min-height:
+                190px;
+
+            padding:
+                28px 20px;
+
+            border-radius:
+                18px;
+
+            background:
+                rgba(255, 255, 255, 0.045);
+
+            border:
+                1px solid rgba(255, 255, 255, 0.08);
+
+            transition:
+                transform 0.25s ease,
+                background 0.25s ease,
+                border-color 0.25s ease;
+
+        }
+
+
+        .historical-race-item:hover {
+
+            transform:
+                translateY(-4px);
+
+            background:
+                rgba(255, 255, 255, 0.065);
+
+            border-color:
+                rgba(255, 70, 70, 0.25);
+
+        }
+
+
+        /* =====================================================
+           INFORMATION LABEL
+        ====================================================== */
+
+        .historical-race-label {
+
+            display:
+                block;
+
+            margin-bottom:
+                14px;
+
+            font-size:
+                13px;
+
+            font-weight:
+                700;
+
+            letter-spacing:
+                1.5px;
+
+            color:
+                rgba(255, 255, 255, 0.48);
+
+        }
+
+
+        /* =====================================================
+           INFORMATION VALUE
+        ====================================================== */
+
+        .historical-race-value {
+
+            display:
+                block;
+
+            width:
+                100%;
+
+            font-family:
+                "Inter",
+                sans-serif;
+
+            font-size:
+                clamp(28px, 2.4vw, 38px);
+
+            font-weight:
+                800;
+
+            line-height:
+                1.15;
+
+            letter-spacing:
+                -0.8px;
+
+            color:
+                #ffffff;
+
+            overflow-wrap:
+                break-word;
+
+        }
+
+
+        /* =====================================================
+           EVENT VALUE
+        ====================================================== */
+
+        #eventName {
+
+            font-family:
+                "Inter",
+                sans-serif;
+
+            font-size:
+                clamp(28px, 2.4vw, 38px);
+
+            font-weight:
+                800;
+
+            line-height:
+                1.15;
+
+            letter-spacing:
+                -0.8px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #ffffff 0%,
+                    #ff4444 100%
+                );
+
+            -webkit-background-clip:
+                text;
+
+            -webkit-text-fill-color:
+                transparent;
+
+            background-clip:
+                text;
+
+            color:
+                transparent;
+
+        }
+
+
+        /* =====================================================
+           SMALL INFORMATION DESCRIPTION
+        ====================================================== */
+
+        .historical-race-description {
+
+            margin-top:
+                10px;
+
+            font-size:
+                13px;
+
+            font-weight:
+                400;
+
+            line-height:
+                1.4;
+
+            color:
+                rgba(255, 255, 255, 0.42);
+
+        }
+
+
+        /* =====================================================
+           RACE RESULTS TABLE
+        ====================================================== */
+
+        .historical-results-card {
+
+            width:
+                100%;
+
+            background:
+                rgba(20, 20, 20, 0.82);
+
+            border:
+                1px solid rgba(255, 255, 255, 0.10);
+
+            border-radius:
+                24px;
+
+            padding:
+                60px;
+
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.25);
+
+            overflow:
+                hidden;
+
+        }
+
+
+        .historical-results-header {
+
+            text-align:
+                center;
+
+            margin-bottom:
+                40px;
+
+        }
+
+
+        .historical-results-header h2 {
+
+            margin:
+                12px 0 16px;
+
+        }
+
+
+        .historical-results-header p {
+
+            width:
+                100%;
+
+            max-width:
+                850px;
+
+            margin:
+                0 auto;
+
+            font-size:
+                16px;
+
+            line-height:
+                1.7;
+
+            color:
+                rgba(255, 255, 255, 0.62);
+
+        }
+
+
+        .historical-results-table-wrapper {
+
+            width:
+                100%;
+
+            overflow-x:
+                auto;
+
+            border-radius:
+                16px;
+
+            border:
+                1px solid rgba(255, 255, 255, 0.08);
+
+            background:
+                rgba(255, 255, 255, 0.025);
+
+        }
+
+
+        #raceResultsTable {
+
+            width:
+                100%;
+
+            min-width:
+                900px;
+
+            border-collapse:
+                collapse;
+
+            font-size:
+                14px;
+
+        }
+
+
+        #raceResultsTable thead {
+
+            background:
+                rgba(255, 255, 255, 0.055);
+
+        }
+
+
+        #raceResultsTable th {
+
+            padding:
+                17px 18px;
+
+            text-align:
+                left;
+
+            font-size:
+                11px;
+
+            font-weight:
+                800;
+
+            letter-spacing:
+                1.3px;
+
+            text-transform:
+                uppercase;
+
+            color:
+                rgba(255, 255, 255, 0.52);
+
+            border-bottom:
+                1px solid rgba(255, 255, 255, 0.10);
+
+            white-space:
+                nowrap;
+
+        }
+
+
+        #raceResultsTable td {
+
+            padding:
+                17px 18px;
+
+            color:
+                rgba(255, 255, 255, 0.86);
+
+            border-bottom:
+                1px solid rgba(255, 255, 255, 0.065);
+
+            white-space:
+                nowrap;
+
+            vertical-align:
+                middle;
+
+        }
+
+
+        #raceResultsTable tbody tr {
+
+            transition:
+                background 0.2s ease;
+
+        }
+
+
+        #raceResultsTable tbody tr:hover {
+
+            background:
+                rgba(255, 255, 255, 0.045);
+
+        }
+
+
+        #raceResultsTable tbody tr:last-child td {
+
+            border-bottom:
+                none;
+
+        }
+
+
+        #raceResultsTable td:first-child {
+
+            width:
+                70px;
+
+            font-size:
+                15px;
+
+            font-weight:
+                800;
+
+            color:
+                #ffffff;
+
+        }
+
+
+        .historical-driver-name {
+
+            font-weight:
+                700;
+
+            color:
+                #ffffff;
+
+        }
+
+
+        .historical-driver-code {
+
+            margin-left:
+                8px;
+
+            font-size:
+                11px;
+
+            font-weight:
+                800;
+
+            letter-spacing:
+                1px;
+
+            color:
+                #ff4b4b;
+
+        }
+
+
+        .historical-team-name {
+
+            color:
+                rgba(255, 255, 255, 0.65);
+
+        }
+
+
+        .historical-points {
+
+            font-weight:
+                800;
+
+            color:
+                #ffffff;
+
+        }
+
+
+        .historical-results-empty {
+
+            padding:
+                55px 25px;
+
+            text-align:
+                center;
+
+            color:
+                rgba(255, 255, 255, 0.45);
+
+            font-size:
+                15px;
+
+        }
+
+
+        #loading {
+
+            width:
+                100%;
+
+            padding:
+                20px;
+
+            text-align:
+                center;
+
+            color:
+                rgba(255, 255, 255, 0.70);
+
+            font-size:
+                15px;
+
+        }
+
+
+        #error {
+
+            width:
+                100%;
+
+            padding:
+                20px;
+
+            text-align:
+                center;
+
+            color:
+                #ff6b6b;
+
+            font-size:
+                15px;
+
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ====================================================== */
+
+        @media (max-width: 1000px) {
+
+            .historical-race-grid {
+
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+
+            }
+
+
+            .historical-results-card {
+
+                padding:
+                    45px 30px;
+
+            }
+
+        }
+
+
+        @media (max-width: 750px) {
+
+            .historical-card {
+
+                padding:
+                    50px 25px;
+
+                border-radius:
+                    20px;
+
+            }
+
+
+            .historical-selection-grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .historical-race-grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .historical-card-description {
+
+                font-size:
+                    16px;
+
+            }
+
+
+            .historical-race-item {
+
+                min-height:
+                    160px;
+
+            }
+
+
+            .historical-race-value {
+
+                font-size:
+                    30px;
+
+            }
+
+
+            .historical-results-card {
+
+                padding:
+                    40px 20px;
+
+                border-radius:
+                    20px;
+
+            }
+
+
+            .historical-results-header {
+
+                margin-bottom:
+                    30px;
+
+            }
+
+        }
+
+
+        @media (max-width: 450px) {
+
+            .historical-card {
+
+                padding:
+                    40px 18px;
+
+            }
+
+
+            .historical-race-value {
+
+                font-size:
+                    27px;
+
+            }
+
+
+            .historical-results-card {
+
+                padding:
+                    35px 15px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================================================
+         BACKGROUND
+    ========================================================== -->
+
+    <div class="background">
+
+        <div class="gradient gradient-1"></div>
+
+        <div class="gradient gradient-2"></div>
+
+        <div class="gradient gradient-3"></div>
+
+        <div class="grid-overlay"></div>
+
+    </div>
+
+
+    <!-- =========================================================
+         NAVIGATION
+    ========================================================== -->
+
+    <header class="navbar">
+
+        <div class="container nav-container">
+
+
+            <!-- HOME LOGO -->
+
+            <a
+                href="/"
+                class="logo"
+                aria-label="F1 AI Strategist Home"
+            >
+
+                <span class="logo-red">
+                    F1
+                </span>
+
+                <span class="logo-white">
+                    AI Strategist
+                </span>
+
+            </a>
+
+
+            <!-- NAVIGATION LINKS -->
+
+            <nav aria-label="Primary Navigation">
+
+                <ul class="nav-links">
+
+
+                    <li>
+
+                        <a href="/">
+                            Home
+                        </a>
+
+                    </li>
+
+
+                    <li>
+
+                        <a
+                            href="/historical.html"
+                            class="active"
+                            aria-current="page"
+                        >
+                            Historical
+                        </a>
+
+                    </li>
+
+
+                    <li>
+
+                        <a href="/engineer.html">
+                            Strategy Engineer
+                        </a>
+
+                    </li>
+
+
+                </ul>
+
+            </nav>
+
+
+            <!-- LAUNCH AI -->
+
+            <a
+                href="/engineer.html"
+                class="btn-nav"
+            >
+                Launch AI
+            </a>
+
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         MAIN CONTENT
+    ========================================================== -->
+
+    <main>
+
+
+        <!-- =====================================================
+             HISTORICAL HERO
+        ====================================================== -->
+
+        <section class="historical-hero">
+
+            <div class="historical-hero-content">
+
+                <span class="historical-hero-tag">
+
+                    HISTORICAL ANALYTICS
+
+                </span>
+
+
+                <h1 class="historical-hero-title">
+
+                    <span class="historical-hero-title-main">
+                        Explore
+                    </span>
+
+                    <span class="historical-hero-title-highlight">
+                        Formula One History
+                    </span>
+
+                </h1>
+
+
+                <p class="historical-hero-description">
+
+                    Select a Formula One season and Grand Prix
+                    to explore historical race information
+                    using data powered by FastF1.
+
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             RACE SELECTION
+        ====================================================== -->
+
+        <section class="section">
+
+            <div class="container">
+
+                <div class="historical-card">
+
+
+                    <span class="section-tag">
+                        RACE SELECTION
+                    </span>
+
+
+                    <h2>
+                        Select Race
+                    </h2>
+
+
+                    <p class="historical-card-description">
+
+                        Choose a Formula One season and Grand Prix
+                        to load historical race information directly
+                        from the F1 AI Strategist backend.
+
+                    </p>
+
+
+                    <div class="historical-selection-grid">
+
+
+                        <!-- SEASON -->
+
+                        <div class="historical-field">
+
+                            <label for="seasonSelect">
+                                F1 Season
+                            </label>
+
+
+                            <select id="seasonSelect">
+
+                                <option value="">
+                                    Select Season
+                                </option>
+
+                                <option value="2026">
+                                    2026
+                                </option>
+
+                                <option value="2025">
+                                    2025
+                                </option>
+
+                                <option value="2024">
+                                    2024
+                                </option>
+
+                                <option value="2023">
+                                    2023
+                                </option>
+
+                                <option value="2022">
+                                    2022
+                                </option>
+
+                                <option value="2021">
+                                    2021
+                                </option>
+
+                                <option value="2020">
+                                    2020
+                                </option>
+
+                                <option value="2019">
+                                    2019
+                                </option>
+
+                                <option value="2018">
+                                    2018
+                                </option>
+
+                                <option value="2017">
+                                    2017
+                                </option>
+
+                                <option value="2016">
+                                    2016
+                                </option>
+
+                                <option value="2015">
+                                    2015
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- GRAND PRIX -->
+
+                        <div class="historical-field">
+
+                            <label for="raceSelect">
+                                Grand Prix
+                            </label>
+
+
+                            <select id="raceSelect">
+
+                                <option value="">
+                                    Select a season first
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             LOADING / ERROR
+        ====================================================== -->
+
+        <section class="section">
+
+            <div class="container">
+
+
+                <div
+                    id="loading"
+                    style="display:none;"
+                >
+                    Loading...
+                </div>
+
+
+                <div
+                    id="error"
+                    style="display:none;"
+                >
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             RACE INFORMATION
+        ====================================================== -->
+
+        <section class="section">
+
+            <div class="container">
+
+                <div
+                    id="raceInfo"
+                    class="historical-card"
+                    style="display:none;"
+                >
+
+
+                    <span class="section-tag">
+                        RACE INFORMATION
+                    </span>
+
+
+                    <h2>
+                        Selected Grand Prix
+                    </h2>
+
+
+                    <p class="historical-card-description">
+
+                        Detailed information about the selected
+                        Formula One Grand Prix retrieved from the
+                        F1 AI Strategist backend.
+
+                    </p>
+
+
+                    <div class="historical-race-grid">
+
+
+                        <!-- EVENT -->
+
+                        <div class="historical-race-item">
+
+                            <span class="historical-race-label">
+                                EVENT
+                            </span>
+
+                            <div
+                                id="eventName"
+                                class="historical-race-value"
+                            >
+                                --
+                            </div>
+
+                            <div class="historical-race-description">
+                                Grand Prix
+                            </div>
+
+                        </div>
+
+
+                        <!-- COUNTRY -->
+
+                        <div class="historical-race-item">
+
+                            <span class="historical-race-label">
+                                COUNTRY
+                            </span>
+
+                            <div
+                                id="countryName"
+                                class="historical-race-value"
+                            >
+                                --
+                            </div>
+
+                            <div class="historical-race-description">
+                                Host Country
+                            </div>
+
+                        </div>
+
+
+                        <!-- LOCATION -->
+
+                        <div class="historical-race-item">
+
+                            <span class="historical-race-label">
+                                LOCATION
+                            </span>
+
+                            <div
+                                id="locationName"
+                                class="historical-race-value"
+                            >
+                                --
+                            </div>
+
+                            <div class="historical-race-description">
+                                Circuit Location
+                            </div>
+
+                        </div>
+
+
+                        <!-- LAPS -->
+
+                        <div class="historical-race-item">
+
+                            <span class="historical-race-label">
+                                LAPS
+                            </span>
+
+                            <div
+                                id="totalLaps"
+                                class="historical-race-value"
+                            >
+                                --
+                            </div>
+
+                            <div class="historical-race-description">
+                                Race Distance
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             RACE RESULTS
+        ====================================================== -->
+
+        <section class="section">
+
+            <div class="container">
+
+                <div
+                    id="raceResults"
+                    class="historical-results-card"
+                    style="display:none;"
+                >
+
+
+                    <div class="historical-results-header">
+
+                        <span class="section-tag">
+                            RACE RESULTS
+                        </span>
+
+
+                        <h2>
+                            Driver Classification
+                        </h2>
+
+
+                        <p>
+
+                            Official driver results for the selected
+                            Grand Prix, including finishing position,
+                            driver information, team and championship
+                            points.
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="historical-results-table-wrapper">
+
+                        <table
+                            id="raceResultsTable"
+                            aria-label="Formula One Race Results"
+                        >
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>POS</th>
+
+                                    <th>DRIVER</th>
+
+                                    <th>DRIVER NO.</th>
+
+                                    <th>TEAM</th>
+
+                                    <th>LAPS</th>
+
+                                    <th>POINTS</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="raceResultsBody">
+
+                                <tr>
+
+                                    <td colspan="6">
+
+                                        <div class="historical-results-empty">
+
+                                            Select a Grand Prix to
+                                            load race results.
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             ANALYTICS PLACEHOLDER
+        ====================================================== -->
+
+        <section class="section">
+
+            <div class="container">
+
+                <div class="cta-card">
+
+                    <span class="section-tag">
+                        ANALYTICS
+                    </span>
+
+
+                    <h2>
+                        Advanced Race Analytics
+                    </h2>
+
+
+                    <p>
+
+                        Telemetry analysis, driver performance,
+                        tyre strategy, lap-time analysis,
+                        pit-stop intelligence and AI strategy
+                        recommendations will be integrated here
+                        in the upcoming development steps.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- =========================================================
+         FOOTER
+    ========================================================== -->
+
+    <footer class="historical-footer">
+
+        <div class="historical-footer-inner">
+
+
+            <!-- BRAND -->
+
+            <div class="historical-footer-brand">
+
+                <div class="historical-footer-logo">
+
+                    <span class="historical-footer-logo-red">
+                        F1
+                    </span>
+
+                    <span>
+                        AI Strategist
+                    </span>
+
+                </div>
+
+
+                <p>
+
+                    Intelligent Formula One strategy and
+                    historical race analytics.
+
+                </p>
+
+
+                <span class="historical-footer-copy">
+
+                    © 2026 F1 AI Strategist.
+                    All rights reserved.
+
+                </span>
+
+            </div>
+
+
+            <!-- NAVIGATION -->
+
+            <div class="historical-footer-navigation">
+
+                <span class="historical-footer-heading">
+                    NAVIGATION
+                </span>
+
+
+                <div class="historical-footer-links">
+
+
+                    <a href="/">
+                        Home
+                    </a>
+
+
+                    <a href="/historical.html">
+                        Historical
+                    </a>
+
+
+                    <a href="/engineer.html">
+                        Strategy Engineer
+                    </a>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- PROJECT -->
+
+            <div class="historical-footer-project">
+
+                <span class="historical-footer-heading">
+                    PROJECT
+                </span>
+
+
+                <p>
+                    F1 AI Strategist
+                </p>
+
+
+                <a
+                    href="https://github.com/sarthak140706-spec/f1-ai-strategy-engine"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="historical-footer-github"
+                >
+
+                    View on GitHub
+
+                    <span>
+                        ↗
+                    </span>
+
+                </a>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- FOOTER BOTTOM -->
+
+        <div class="historical-footer-bottom">
+
+            <span>
+
+                Built for Formula One analytics &
+                strategy intelligence.
+
+            </span>
+
+
+            <span>
+
+                Designed by Sarthak Jadhav
+
+            </span>
+
+        </div>
+
+    </footer>
+
+
+    <!-- =========================================================
+         JAVASCRIPT
+    ========================================================== -->
+
+    <script src="js/api.js"></script>
+
+    <script src="js/historical.js"></script>
+
+
+</body>
+
+</html>

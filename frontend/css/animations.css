@@ -1,0 +1,622 @@
+/* ===========================================================
+   F1 AI STRATEGIST
+   ANIMATIONS.CSS
+   Version: 1.0
+=========================================================== */
+
+
+/* ==========================================
+   FADE IN
+========================================== */
+
+@keyframes fadeIn{
+
+    from{
+
+        opacity:0;
+
+    }
+
+    to{
+
+        opacity:1;
+
+    }
+
+}
+
+
+/* ==========================================
+   FADE UP
+========================================== */
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:
+            translateY(60px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+            translateY(0);
+
+    }
+
+}
+
+
+/* ==========================================
+   FADE DOWN
+========================================== */
+
+@keyframes fadeDown{
+
+    from{
+
+        opacity:0;
+
+        transform:
+            translateY(-60px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+            translateY(0);
+
+    }
+
+}
+
+
+/* ==========================================
+   FADE LEFT
+========================================== */
+
+@keyframes fadeLeft{
+
+    from{
+
+        opacity:0;
+
+        transform:
+            translateX(-80px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+            translateX(0);
+
+    }
+
+}
+
+
+/* ==========================================
+   FADE RIGHT
+========================================== */
+
+@keyframes fadeRight{
+
+    from{
+
+        opacity:0;
+
+        transform:
+            translateX(80px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+            translateX(0);
+
+    }
+
+}
+
+
+/* ==========================================
+   ZOOM IN
+========================================== */
+
+@keyframes zoomIn{
+
+    from{
+
+        opacity:0;
+
+        transform:
+            scale(.8);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+            scale(1);
+
+    }
+
+}
+
+
+/* ==========================================
+   ZOOM OUT
+========================================== */
+
+@keyframes zoomOut{
+
+    from{
+
+        opacity:0;
+
+        transform:
+            scale(1.2);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+            scale(1);
+
+    }
+
+}
+
+
+/* ==========================================
+   HERO FLOAT
+========================================== */
+
+@keyframes heroFloat{
+
+    0%{
+
+        transform:
+            translateY(0);
+
+    }
+
+    50%{
+
+        transform:
+            translateY(-12px);
+
+    }
+
+    100%{
+
+        transform:
+            translateY(0);
+
+    }
+
+}
+
+
+/* ==========================================
+   GLOW PULSE
+========================================== */
+
+@keyframes glowPulse{
+
+    0%{
+
+        box-shadow:
+            0 0 0 rgba(225,6,0,.15);
+
+    }
+
+    50%{
+
+        box-shadow:
+            0 0 40px rgba(225,6,0,.55);
+
+    }
+
+    100%{
+
+        box-shadow:
+            0 0 0 rgba(225,6,0,.15);
+
+    }
+
+}
+
+
+/* ==========================================
+   BUTTON SHINE
+========================================== */
+
+@keyframes buttonShine{
+
+    from{
+
+        left:-120%;
+
+    }
+
+    to{
+
+        left:130%;
+
+    }
+
+}
+
+
+/* ==========================================
+   ROTATE
+========================================== */
+
+@keyframes rotate360{
+
+    from{
+
+        transform:
+            rotate(0deg);
+
+    }
+
+    to{
+
+        transform:
+            rotate(360deg);
+
+    }
+
+}
+
+
+/* ==========================================
+   BACKGROUND GRADIENT
+========================================== */
+
+@keyframes gradientMove{
+
+    0%{
+
+        background-position:0% 50%;
+
+    }
+
+    50%{
+
+        background-position:100% 50%;
+
+    }
+
+    100%{
+
+        background-position:0% 50%;
+
+    }
+
+}
+
+
+/* ==========================================
+   GLOW FLOAT
+========================================== */
+
+@keyframes glowFloat{
+
+    0%{
+
+        transform:
+            translate(0,0)
+            scale(1);
+
+    }
+
+    50%{
+
+        transform:
+            translate(60px,-45px)
+            scale(1.15);
+
+    }
+
+    100%{
+
+        transform:
+            translate(0,0)
+            scale(1);
+
+    }
+
+}
+
+
+/* ==========================================
+   CARD HOVER
+========================================== */
+
+@keyframes cardFloat{
+
+    0%{
+
+        transform:
+            translateY(0);
+
+    }
+
+    50%{
+
+        transform:
+            translateY(-8px);
+
+    }
+
+    100%{
+
+        transform:
+            translateY(0);
+
+    }
+
+}
+
+
+/* ==========================================
+   SPIN
+========================================== */
+
+@keyframes spin{
+
+    from{
+
+        transform:
+            rotate(0);
+
+    }
+
+    to{
+
+        transform:
+            rotate(360deg);
+
+    }
+
+}
+
+
+/* ==========================================
+   SCALE PULSE
+========================================== */
+
+@keyframes pulse{
+
+    0%{
+
+        transform:
+            scale(1);
+
+    }
+
+    50%{
+
+        transform:
+            scale(1.05);
+
+    }
+
+    100%{
+
+        transform:
+            scale(1);
+
+    }
+
+}
+
+
+/* ==========================================
+   BOUNCE
+========================================== */
+
+@keyframes bounce{
+
+    0%,100%{
+
+        transform:
+            translateY(0);
+
+    }
+
+    50%{
+
+        transform:
+            translateY(-14px);
+
+    }
+
+}
+
+
+/* ==========================================
+   UTILITY ANIMATION CLASSES
+========================================== */
+
+.fade-in{
+
+    animation:
+        fadeIn .8s ease forwards;
+
+}
+
+.fade-up{
+
+    animation:
+        fadeUp .9s ease forwards;
+
+}
+
+.fade-down{
+
+    animation:
+        fadeDown .9s ease forwards;
+
+}
+
+.fade-left{
+
+    animation:
+        fadeLeft .9s ease forwards;
+
+}
+
+.fade-right{
+
+    animation:
+        fadeRight .9s ease forwards;
+
+}
+
+.zoom-in{
+
+    animation:
+        zoomIn .8s ease forwards;
+
+}
+
+.zoom-out{
+
+    animation:
+        zoomOut .8s ease forwards;
+
+}
+
+.float{
+
+    animation:
+        heroFloat 7s ease-in-out infinite;
+
+}
+
+.glow-pulse{
+
+    animation:
+        glowPulse 2.8s infinite;
+
+}
+
+.spin{
+
+    animation:
+        spin 10s linear infinite;
+
+}
+
+.rotate{
+
+    animation:
+        rotate360 12s linear infinite;
+
+}
+
+.pulse{
+
+    animation:
+        pulse 2s infinite;
+
+}
+
+.bounce{
+
+    animation:
+        bounce 2s infinite;
+
+}
+
+
+/* ==========================================
+   STAGGER DELAYS
+========================================== */
+
+.delay-1{
+
+    animation-delay:.1s;
+
+}
+
+.delay-2{
+
+    animation-delay:.2s;
+
+}
+
+.delay-3{
+
+    animation-delay:.3s;
+
+}
+
+.delay-4{
+
+    animation-delay:.4s;
+
+}
+
+.delay-5{
+
+    animation-delay:.5s;
+
+}
+
+.delay-6{
+
+    animation-delay:.6s;
+
+}
+
+
+/* ==========================================
+   SCROLL REVEAL SUPPORT
+========================================== */
+
+.reveal{
+
+    opacity:0;
+
+    transform:
+        translateY(60px);
+
+    transition:
+        opacity .8s ease,
+        transform .8s ease;
+
+}
+
+.reveal.active{
+
+    opacity:1;
+
+    transform:
+        translateY(0);
+
+}

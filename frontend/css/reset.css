@@ -1,0 +1,443 @@
+/* ===========================================================
+   F1 AI STRATEGIST
+   RESET.CSS
+   Version: 1.0
+=========================================================== */
+
+
+/* ==========================================
+   UNIVERSAL RESET
+========================================== */
+
+*,
+*::before,
+*::after{
+
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+
+}
+
+
+/* ==========================================
+   ROOT
+========================================== */
+
+html{
+
+    font-size:16px;
+    scroll-behavior:smooth;
+    -webkit-text-size-adjust:100%;
+
+}
+
+
+/* ==========================================
+   BODY
+========================================== */
+
+body{
+
+    min-height:100vh;
+
+    font-family:var(--font-family);
+
+    font-size:var(--fs-md);
+
+    font-weight:var(--fw-regular);
+
+    line-height:var(--lh-normal);
+
+    color:var(--text);
+
+    background:var(--background);
+
+    overflow-x:hidden;
+
+    position:relative;
+
+    text-rendering:optimizeLegibility;
+
+    -webkit-font-smoothing:antialiased;
+
+    -moz-osx-font-smoothing:grayscale;
+
+}
+
+
+/* ==========================================
+   HTML5 ELEMENTS
+========================================== */
+
+main,
+section,
+article,
+aside,
+header,
+footer,
+nav{
+
+    display:block;
+
+}
+
+
+/* ==========================================
+   HEADINGS
+========================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6{
+
+    font-weight:var(--fw-bold);
+
+    line-height:1.2;
+
+    color:var(--text);
+
+}
+
+
+/* ==========================================
+   PARAGRAPHS
+========================================== */
+
+p{
+
+    color:var(--text-secondary);
+
+    line-height:1.8;
+
+}
+
+
+/* ==========================================
+   LINKS
+========================================== */
+
+a{
+
+    color:inherit;
+
+    text-decoration:none;
+
+    transition:var(--transition-normal);
+
+}
+
+a:hover{
+
+    text-decoration:none;
+
+}
+
+
+/* ==========================================
+   LISTS
+========================================== */
+
+ul,
+ol{
+
+    list-style:none;
+
+}
+
+
+/* ==========================================
+   IMAGES
+========================================== */
+
+img,
+picture{
+
+    display:block;
+
+    max-width:100%;
+
+    height:auto;
+
+}
+
+
+/* ==========================================
+   SVG
+========================================== */
+
+svg{
+
+    display:block;
+
+    max-width:100%;
+
+}
+
+
+/* ==========================================
+   MEDIA
+========================================== */
+
+video,
+canvas,
+iframe{
+
+    display:block;
+
+    max-width:100%;
+
+}
+
+
+/* ==========================================
+   TABLES
+========================================== */
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    border-spacing:0;
+
+}
+
+
+/* ==========================================
+   BUTTONS
+========================================== */
+
+button{
+
+    border:none;
+
+    outline:none;
+
+    background:none;
+
+    font:inherit;
+
+    color:inherit;
+
+    cursor:pointer;
+
+}
+
+
+/* ==========================================
+   FORM ELEMENTS
+========================================== */
+
+input,
+textarea,
+select{
+
+    font:inherit;
+
+    color:inherit;
+
+    background:none;
+
+    border:none;
+
+    outline:none;
+
+}
+
+
+textarea{
+
+    resize:vertical;
+
+}
+
+
+/* ==========================================
+   PLACEHOLDER
+========================================== */
+
+::placeholder{
+
+    color:var(--text-muted);
+
+    opacity:1;
+
+}
+
+
+/* ==========================================
+   INPUT AUTOFILL
+========================================== */
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus{
+
+    -webkit-text-fill-color:var(--text);
+
+    transition:background-color 5000s ease-in-out 0s;
+
+}
+
+
+/* ==========================================
+   HORIZONTAL RULE
+========================================== */
+
+hr{
+
+    border:none;
+
+    height:1px;
+
+    background:var(--border);
+
+}
+
+
+/* ==========================================
+   FIELDSET
+========================================== */
+
+fieldset{
+
+    border:none;
+
+}
+
+
+/* ==========================================
+   DETAILS
+========================================== */
+
+details{
+
+    display:block;
+
+}
+
+summary{
+
+    cursor:pointer;
+
+}
+
+
+/* ==========================================
+   SELECTION
+========================================== */
+
+::selection{
+
+    background:var(--primary);
+
+    color:#ffffff;
+
+}
+
+
+/* ==========================================
+   SCROLLBAR
+========================================== */
+
+::-webkit-scrollbar{
+
+    width:var(--scrollbar-width);
+
+    height:var(--scrollbar-width);
+
+}
+
+::-webkit-scrollbar-track{
+
+    background:var(--background-secondary);
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:var(--primary);
+
+    border-radius:999px;
+
+}
+
+::-webkit-scrollbar-thumb:hover{
+
+    background:var(--primary-light);
+
+}
+
+
+/* ==========================================
+   FOCUS STYLES
+========================================== */
+
+:focus-visible{
+
+    outline:2px solid var(--primary);
+
+    outline-offset:4px;
+
+}
+
+
+/* ==========================================
+   DISABLED
+========================================== */
+
+button:disabled,
+input:disabled,
+textarea:disabled,
+select:disabled{
+
+    cursor:not-allowed;
+
+    opacity:.6;
+
+}
+
+
+/* ==========================================
+   HIDDEN
+========================================== */
+
+[hidden]{
+
+    display:none !important;
+
+}
+
+
+/* ==========================================
+   REDUCED MOTION
+========================================== */
+
+@media (prefers-reduced-motion:reduce){
+
+    html{
+
+        scroll-behavior:auto;
+
+    }
+
+    *,
+    *::before,
+    *::after{
+
+        animation-duration:.01ms !important;
+
+        animation-iteration-count:1 !important;
+
+        transition-duration:.01ms !important;
+
+        scroll-behavior:auto !important;
+
+    }
+
+}

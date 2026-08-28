@@ -50,6 +50,13 @@ def validate_grand_prix(
     """
     Validate that the requested Grand Prix
     exists in the specified F1 season.
+
+    The validation accepts:
+        - EventName
+        - Country
+        - Location
+
+    Comparison is case-insensitive.
     """
 
     try:
@@ -68,20 +75,69 @@ def validate_grand_prix(
         ) from e
 
 
-    valid_grands_prix = [
+    # --------------------------------------------------
+    # BUILD VALID GRAND PRIX NAMES
+    # --------------------------------------------------
 
-        str(event.EventName).strip()
+    valid_grands_prix = []
 
-        for _, event in schedule.iterrows()
+    for _, event in schedule.iterrows():
 
+        # Event name
         if pd.notna(
             event.EventName
-        )
+        ):
+
+            valid_grands_prix.append(
+                str(
+                    event.EventName
+                ).strip()
+            )
+
+        # Country
+        if pd.notna(
+            event.Country
+        ):
+
+            valid_grands_prix.append(
+                str(
+                    event.Country
+                ).strip()
+            )
+
+        # Circuit/location
+        if pd.notna(
+            event.Location
+        ):
+
+            valid_grands_prix.append(
+                str(
+                    event.Location
+                ).strip()
+            )
+
+
+    # --------------------------------------------------
+    # CASE-INSENSITIVE VALIDATION
+    # --------------------------------------------------
+
+    requested_grand_prix = (
+        grand_prix.strip().lower()
+    )
+
+    valid_grands_prix_lower = [
+
+        gp.lower()
+
+        for gp in valid_grands_prix
 
     ]
 
 
-    if grand_prix not in valid_grands_prix:
+    if (
+        requested_grand_prix
+        not in valid_grands_prix_lower
+    ):
 
         raise ValueError(
 
@@ -179,7 +235,11 @@ def load_session(
         )
 
 
-    session_type = session_type.strip().upper()
+    session_type = (
+        session_type
+        .strip()
+        .upper()
+    )
 
 
     if not session_type:
